@@ -1,0 +1,47 @@
+{
+  "name": "stock-tracker",
+  "version": "1.0.0",
+  "description": "Electron app for tracking stocks and portfolio assets",
+  "main": "dist/main/main.js",
+  "scripts": {
+    "dev": "pnpm build:main && concurrently \"pnpm dev:vite\" \"wait-on http://localhost:5173 && pnpm dev:electron\"",
+    "dev:vite": "vite",
+    "dev:electron": "NODE_ENV=development pnpm exec electron .",
+    "dev:watch": "concurrently \"pnpm dev:vite\" \"pnpm watch:main\" \"wait-on http://localhost:5173 && pnpm dev:electron\"",
+    "watch:main": "tsc -p tsconfig.main.json --watch",
+    "build": "pnpm build:main && pnpm build:renderer",
+    "build:main": "tsc -p tsconfig.main.json",
+    "build:renderer": "vite build",
+    "preview": "vite preview",
+    "electron:dev": "pnpm exec electron .",
+    "electron:build": "electron-builder",
+    "postinstall": "electron-builder install-app-deps"
+  },
+  "keywords": [
+    "electron",
+    "stock",
+    "portfolio",
+    "tracker"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "better-sqlite3": "^9.2.2",
+    "electron": "^28.3.3",
+    "react-icons": "^5.5.0"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.8",
+    "@types/node": "^20.10.0",
+    "@types/react": "^18.2.43",
+    "@types/react-dom": "^18.2.17",
+    "@vitejs/plugin-react": "^4.2.1",
+    "concurrently": "^8.2.2",
+    "electron-builder": "^24.9.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "typescript": "^5.3.3",
+    "vite": "^5.0.8",
+    "wait-on": "^7.2.0"
+  }
+}

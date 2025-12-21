@@ -1,0 +1,151 @@
+:root {
+  /* Colors - Primary */
+  --color-primary: #007aff;
+  --color-primary-hover: #0051d5;
+  --color-primary-light: #e3f2fd;
+  --color-primary-dark: #1976d2;
+
+  /* Colors - Secondary */
+  --color-secondary: #2196f3;
+  --color-secondary-hover: #1976d2;
+
+  /* Colors - Success */
+  --color-success: #4caf50;
+  --color-success-hover: #45a049;
+  --color-success-light: rgba(76, 175, 80, 0.1);
+  --color-success-dark: #388e3c;
+
+  /* Colors - Error/Danger */
+  --color-error: #f44336;
+  --color-error-hover: #d32f2f;
+  --color-error-light: #ffebee;
+  --color-error-dark: #c62828;
+
+  /* Colors - Warning */
+  --color-warning: #ff9800;
+  --color-warning-light: #fff3e0;
+
+  /* Colors - Text */
+  --color-text-primary: #1a1a1a;
+  --color-text-secondary: #1d1d1f;
+  --color-text-tertiary: #333;
+  --color-text-muted: #666;
+  --color-text-light: #86868b;
+  --color-text-disabled: #999;
+
+  /* Colors - Backgrounds */
+  --color-bg-primary: #ffffff;
+  --color-bg-secondary: #f5f5f5;
+  --color-bg-tertiary: #f9f9f9;
+  --color-bg-hover: #fafafa;
+  --color-bg-active: #e8e8e8;
+  --color-bg-disabled: #f5f5f5;
+
+  /* Colors - Borders */
+  --color-border-light: #e0e0e0;
+  --color-border-medium: #d1d1d6;
+  --color-border-dark: #ccc;
+  --color-border-hover: #999;
+
+  /* Colors - Overlay */
+  --color-overlay: rgba(0, 0, 0, 0.5);
+
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 12px;
+  --spacing-lg: 16px;
+  --spacing-xl: 20px;
+  --spacing-2xl: 24px;
+  --spacing-3xl: 30px;
+  --spacing-4xl: 32px;
+  --spacing-5xl: 40px;
+  --spacing-6xl: 48px;
+  --spacing-7xl: 80px;
+
+  /* Typography - Font Sizes */
+  --font-size-xs: 10px;
+  --font-size-sm: 12px;
+  --font-size-base: 14px;
+  --font-size-md: 15px;
+  --font-size-lg: 16px;
+  --font-size-xl: 18px;
+  --font-size-2xl: 20px;
+  --font-size-3xl: 24px;
+  --font-size-4xl: 32px;
+  --font-size-5xl: 42px;
+
+  /* Typography - Font Weights */
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* Typography - Line Heights */
+  --line-height-tight: 1.2;
+  --line-height-normal: 1.3;
+  --line-height-relaxed: 1.4;
+  --line-height-loose: 1.5;
+
+  /* Typography - Letter Spacing */
+  --letter-spacing-tight: -0.04em;
+  --letter-spacing-normal: -0.02em;
+  --letter-spacing-relaxed: -0.01em;
+  --letter-spacing-wide: 0.5px;
+  --letter-spacing-wider: 0.8px;
+
+  /* Border Radius */
+  --radius-xs: 3px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
+  --radius-full: 50%;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.12);
+  --shadow-xl: 0 8px 32px rgba(0, 0, 0, 0.2);
+  --shadow-primary: 0 2px 8px rgba(76, 175, 80, 0.3);
+  --shadow-primary-hover: 0 4px 12px rgba(76, 175, 80, 0.4);
+
+  /* Transitions */
+  --transition-fast: 0.15s;
+  --transition-base: 0.2s;
+  --transition-slow: 0.3s;
+  --transition-all: all var(--transition-base);
+
+  /* Z-Index */
+  --z-index-dropdown: 100;
+  --z-index-sticky: 200;
+  --z-index-modal-backdrop: 1000;
+  --z-index-modal: 1001;
+  --z-index-popover: 1100;
+  --z-index-tooltip: 1200;
+
+  /* Scrollbar */
+  --scrollbar-width: 6px;
+  --scrollbar-radius: 3px;
+
+  /* Font Family */
+  --font-family-base: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+}
+
+/* Dark mode support (optional, for future use) */
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Uncomment and adjust for dark mode when needed */
+    /*
+    --color-text-primary: #ffffff;
+    --color-text-secondary: #e0e0e0;
+    --color-text-muted: #999;
+    --color-bg-primary: #1a1a1a;
+    --color-bg-secondary: #2d2d2d;
+    --color-border-light: #404040;
+    */
+  }
+}
+
