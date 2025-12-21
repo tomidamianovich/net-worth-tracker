@@ -1,6 +1,6 @@
-# Stock Tracker
+# Net Worth Tracker
 
-Aplicación Electron para gestionar y hacer seguimiento de activos y stocks en tu portfolio.
+Aplicación Electron para gestionar y hacer seguimiento de tu patrimonio neto, activos y portfolio.
 
 ## Características
 

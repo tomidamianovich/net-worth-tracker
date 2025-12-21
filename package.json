@@ -1,7 +1,7 @@
 {
-  "name": "stock-tracker",
+  "name": "net-worth-tracker",
   "version": "1.0.0",
-  "description": "Electron app for tracking stocks and portfolio assets",
+  "description": "Electron app for tracking net worth, assets and portfolio",
   "main": "dist/main/main.js",
   "scripts": {
     "dev": "pnpm build:main && concurrently \"pnpm dev:vite\" \"wait-on http://localhost:5173 && pnpm dev:electron\"",
@@ -19,9 +19,10 @@
   },
   "keywords": [
     "electron",
-    "stock",
+    "net-worth",
     "portfolio",
-    "tracker"
+    "tracker",
+    "assets"
   ],
   "author": "",
   "license": "MIT",
