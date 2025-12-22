@@ -24,11 +24,13 @@
     "tracker",
     "assets"
   ],
-  "author": "",
+  "author": {
+    "name": "Tomidamianovich",
+    "email": "tomidamianovich@users.noreply.github.com"
+  },
   "license": "MIT",
   "dependencies": {
     "better-sqlite3": "^9.2.2",
-    "electron": "^28.3.3",
     "react-icons": "^5.5.0"
   },
   "devDependencies": {
@@ -38,11 +40,29 @@
     "@types/react-dom": "^18.2.17",
     "@vitejs/plugin-react": "^4.2.1",
     "concurrently": "^8.2.2",
+    "electron": "^28.3.3",
     "electron-builder": "^24.9.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "typescript": "^5.3.3",
     "vite": "^5.0.8",
     "wait-on": "^7.2.0"
+  },
+  "build": {
+    "appId": "com.networthtracker.app",
+    "productName": "Net Worth Tracker",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "package.json"
+    ],
+    "linux": {
+      "target": [
+        "AppImage"
+      ],
+      "category": "Finance"
+    }
   }
 }

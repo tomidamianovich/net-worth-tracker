@@ -24,16 +24,20 @@ export const es = {
     analysis: "Análisis",
     categories: "Categorías",
     evolution: "Evolución",
+    propertyInvestment: "Inversión Piso",
     import: "Importar",
     export: "Exportar",
+    backup: "Backup",
+    restore: "Restaurar",
+    changePassword: "Cambiar Contraseña",
   },
 
   // Portfolio
   portfolio: {
     title: "Portfolio de Acciones",
     subtitle: "Resumen general de tu cartera",
-    totalValue: "VALOR TOTAL",
-    variation: "Variación €",
+    totalValue: "Valor total",
+    variation: "Variación",
     portfolioPercentage: "% Cartera",
     empty: "No hay activos en esta categoría",
     filters: {
@@ -42,12 +46,14 @@ export const es = {
     asset: {
       variation: "VARIACIÓN",
       portfolioPercentage: "% CARTERA",
-      cost: "COSTE",
+      initialInvestment: "INVERSIÓN INICIAL",
       purchaseValue: "VALOR COMPRA",
       currentValue: "VALOR ACTUAL",
+      currentTotalValue: "VALOR ACTUAL TOTAL",
       edit: "Editar",
       delete: "Eliminar",
       deleteConfirm: "¿Estás seguro de que quieres eliminar este activo?",
+      updatePrice: "Actualizar precio",
     },
   },
 
@@ -71,13 +77,16 @@ export const es = {
     code: "Código (Tipo)",
     codePlaceholder: "Ej: ACCION, ETF",
     codeMaxLength: "Máximo 20 caracteres, se convertirá a mayúsculas",
-    codeReadonly: "El código no se puede modificar después de crear la categoría",
+    codeReadonly:
+      "El código no se puede modificar después de crear la categoría",
     name: "Nombre",
     namePlaceholder: "Ej: Acciones, ETFs",
     color: "Color",
     colorPlaceholder: "#808080",
-    deleteConfirm: "¿Estás seguro de que quieres eliminar esta categoría? Los activos que usen esta categoría no se verán afectados.",
-    cannotDelete: "No se puede eliminar: tiene {count} activo{plural} asociado{plural}",
+    deleteConfirm:
+      "¿Estás seguro de que quieres eliminar esta categoría? Los activos que usen esta categoría no se verán afectados.",
+    cannotDelete:
+      "No se puede eliminar: tiene {count} activo{plural} asociado{plural}",
     errorLoading: "Error al cargar categorías. Por favor, inténtalo de nuevo.",
     errorSaving: "Error al guardar categoría",
     errorDeleting: "Error al eliminar categoría",
@@ -86,6 +95,7 @@ export const es = {
   // Evolution
   evolution: {
     title: "Evolución Patrimonial",
+    subtitle: "Registro histórico de tu patrimonio",
     addNew: "Nuevo Registro",
     edit: "Editar Registro",
     empty: "No hay registros. Crea un nuevo registro para comenzar.",
@@ -142,7 +152,12 @@ export const es = {
       allFieldsRequired: "Por favor completa todos los campos correctamente",
     },
     errorSaving: "Error al guardar el activo",
-    errorDeleting: "Error al eliminar el activo. Por favor, inténtalo de nuevo.",
+    errorDeleting:
+      "Error al eliminar el activo. Por favor, inténtalo de nuevo.",
+    errorUpdating:
+      "Error al actualizar el precio. Por favor, inténtalo de nuevo.",
+    updateNotSupported:
+      "La actualización automática no está disponible para este tipo de activo",
     assetTypes: {
       action: "Acción",
       etf: "ETF",
@@ -193,18 +208,95 @@ export const es = {
     notes: "Notas",
   },
 
+  // Property Investment
+  propertyInvestment: {
+    title: "Inversión Piso Argentina",
+    subtitle: "Seguimiento de ingresos por alquiler",
+    empty: "No hay ingresos registrados",
+    deleteConfirm: "¿Estás seguro de que quieres eliminar este ingreso?",
+    errorDeleting: "Error al eliminar ingreso",
+    errorSaving: "Error al guardar ingreso",
+    table: {
+      year: "Año",
+      month: "Mes",
+      rentPrice: "Precio alquiler ",
+      valueUSD: "Valor USD",
+      profitUSD: "Ganancia USD",
+      monthlyAverageUSD: "Promedio Mensual USD",
+      annualProfitsUSD: "Ganancias anuales USD",
+      annualizedProfit: "Ganancia Anualizada",
+      totalAverage: "Promedio Total",
+      total: "Total Final",
+    },
+    modal: {
+      add: "Agregar Ingreso de Alquiler",
+      edit: "Editar Ingreso de Alquiler",
+      year: "Año",
+      month: "Mes",
+      rentPrice: "Precio Alquiler (ARS)",
+      valueUSD: "Tipo de Cambio USD/ARS",
+    },
+  },
+
   // Messages
   messages: {
-    electronNotAvailable: "Error: La aplicación no está ejecutándose en Electron.",
+    electronNotAvailable:
+      "Error: La aplicación no está ejecutándose en Electron.",
     dataExported: "Datos exportados exitosamente a {path}",
     dataImported: "¡Datos importados exitosamente!",
-    importConfirm: "Esto reemplazará todos los datos existentes. ¿Estás seguro?",
+    importConfirm:
+      "Esto reemplazará todos los datos existentes. ¿Estás seguro?",
     exportFailed: "Error al exportar datos. Por favor, inténtalo de nuevo.",
     importFailed: "Error al importar datos. Por favor, inténtalo de nuevo.",
     errorLoading: "Error al cargar datos",
     errorGeneric: "Ha ocurrido un error. Por favor, inténtalo de nuevo.",
+    backupCreated: "Backup creado exitosamente en {path}",
+    backupFailed: "Error al crear el backup. Por favor, inténtalo de nuevo.",
+    restoreConfirm:
+      "¿Estás seguro de que quieres restaurar desde un backup? Esto reemplazará todos los datos actuales.",
+    dataRestored: "¡Datos restaurados exitosamente!",
+    restoreFailed:
+      "Error al restaurar desde el backup. Por favor, inténtalo de nuevo.",
+  },
+
+  // Login
+  login: {
+    title: "Net Worth Tracker",
+    subtitle: "Inicia sesión para continuar",
+    setupSubtitle: "Configura tu usuario inicial",
+    username: "Usuario",
+    usernamePlaceholder: "Ingresa tu usuario",
+    password: "Contraseña",
+    passwordPlaceholder: "Ingresa tu contraseña",
+    confirmPassword: "Confirmar Contraseña",
+    confirmPasswordPlaceholder: "Confirma tu contraseña",
+    login: "Iniciar Sesión",
+    createUser: "Crear Usuario",
+    allFieldsRequired: "Todos los campos son requeridos",
+    passwordsDoNotMatch: "Las contraseñas no coinciden",
+    passwordTooShort: "La contraseña debe tener al menos 4 caracteres",
+    invalidCredentials: "Usuario o contraseña incorrectos",
+    loginFailed: "Error al iniciar sesión",
+    setupFailed: "Error al crear el usuario",
+  },
+
+  // Change Password
+  changePassword: {
+    title: "Cambiar Contraseña",
+    currentPassword: "Contraseña Actual",
+    currentPasswordPlaceholder: "Ingresa tu contraseña actual",
+    newPassword: "Nueva Contraseña",
+    newPasswordPlaceholder: "Ingresa tu nueva contraseña",
+    confirmNewPassword: "Confirmar Nueva Contraseña",
+    confirmNewPasswordPlaceholder: "Confirma tu nueva contraseña",
+    change: "Cambiar Contraseña",
+    allFieldsRequired: "Todos los campos son requeridos",
+    passwordsDoNotMatch: "Las nuevas contraseñas no coinciden",
+    passwordTooShort: "La contraseña debe tener al menos 4 caracteres",
+    samePassword: "La nueva contraseña debe ser diferente a la actual",
+    success: "Contraseña cambiada exitosamente",
+    failed: "Error al cambiar la contraseña",
   },
 };
 
 export type TranslationKey = keyof typeof es;
-

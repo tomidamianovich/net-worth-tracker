@@ -68,6 +68,16 @@ try {
       updates: Partial<Omit<Asset, "id" | "createdAt" | "updatedAt">>
     ) => ipcRenderer.invoke("update-asset", id, updates),
     deleteAsset: (id: number) => ipcRenderer.invoke("delete-asset", id),
+    updateAssetWithBtcPrice: (assetId: number) =>
+      ipcRenderer.invoke("update-asset-with-btc-price", assetId),
+    updateAssetWithCryptoPrice: (assetId: number) =>
+      ipcRenderer.invoke("update-asset-with-crypto-price", assetId),
+    fetchBtcPrice: () => ipcRenderer.invoke("fetch-btc-price"),
+    fetchCryptoPrice: (cryptoType: string) =>
+      ipcRenderer.invoke("fetch-crypto-price", cryptoType),
+    fetchGoldPrice: () => ipcRenderer.invoke("fetch-gold-price"),
+    updateAssetWithGoldPrice: (assetId: number) =>
+      ipcRenderer.invoke("update-asset-with-gold-price", assetId),
 
     // Category APIs
     getCategories: () => ipcRenderer.invoke("get-categories"),
@@ -99,5 +109,41 @@ try {
     ) => ipcRenderer.invoke("update-patrimonial-evolution", id, updates),
     deletePatrimonialEvolution: (id: number) =>
       ipcRenderer.invoke("delete-patrimonial-evolution", id),
+
+    // Rental Income APIs
+    getRentalIncomes: () => ipcRenderer.invoke("get-rental-incomes"),
+    addRentalIncome: (income: {
+      año: number;
+      mes: number;
+      precioAlquilerARS: number;
+      valorUSD: number;
+      gananciaUSD: number;
+    }) => ipcRenderer.invoke("add-rental-income", income),
+    updateRentalIncome: (
+      id: number,
+      updates: {
+        año?: number;
+        mes?: number;
+        precioAlquilerARS?: number;
+        valorUSD?: number;
+        gananciaUSD?: number;
+      }
+    ) => ipcRenderer.invoke("update-rental-income", id, updates),
+    deleteRentalIncome: (id: number) =>
+      ipcRenderer.invoke("delete-rental-income", id),
+
+    // Backup and restore APIs
+    createBackup: () => ipcRenderer.invoke("create-backup"),
+    saveBackupAs: () => ipcRenderer.invoke("save-backup-as"),
+    restoreFromBackup: () => ipcRenderer.invoke("restore-from-backup"),
+
+    // Authentication APIs
+    login: (username: string, password: string) =>
+      ipcRenderer.invoke("login", username, password),
+    hasUsers: () => ipcRenderer.invoke("has-users"),
+    setupInitialUser: (username: string, password: string) =>
+      ipcRenderer.invoke("setup-initial-user", username, password),
+    changePassword: (username: string, oldPassword: string, newPassword: string) =>
+      ipcRenderer.invoke("change-password", username, oldPassword, newPassword),
   });
 } catch (error) {}

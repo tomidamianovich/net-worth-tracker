@@ -1,8 +1,8 @@
 export enum ViewType {
   Portfolio = "portfolio",
-  Analysis = "analysis",
   Categories = "categories",
   Evolution = "evolution",
+  PropertyInvestment = "property-investment",
 }
 
 export type ViewTypeValue = ViewType | `${ViewType}`;

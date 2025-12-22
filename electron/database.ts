@@ -6,6 +6,7 @@ import * as fs from "fs";
 export class StockDatabase {
   private db: Database.Database;
   private encryptionKey: Buffer;
+  private dbPath: string;
 
   constructor(dbPath: string) {
     const dir = path.dirname(dbPath);
@@ -13,6 +14,7 @@ export class StockDatabase {
       fs.mkdirSync(dir, { recursive: true });
     }
 
+    this.dbPath = dbPath;
     this.db = new Database(dbPath);
     this.encryptionKey = this.getOrCreateEncryptionKey();
     this.initializeTables();
@@ -116,6 +118,27 @@ export class StockDatabase {
       );
 
       CREATE INDEX IF NOT EXISTS idx_patrimonial_evolution_año_mes ON patrimonial_evolution(año, mes);
+
+      CREATE TABLE IF NOT EXISTS rental_incomes (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        año INTEGER NOT NULL,
+        mes INTEGER NOT NULL,
+        precio_alquiler_ars REAL NOT NULL,
+        valor_usd REAL NOT NULL,
+        ganancia_usd REAL NOT NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_rental_incomes_año_mes ON rental_incomes(año, mes);
+
+      CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT NOT NULL UNIQUE,
+        password_hash TEXT NOT NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      );
     `);
 
     try {
@@ -638,6 +661,206 @@ export class StockDatabase {
     );
     const result = stmt.run(id);
     return result.changes > 0;
+  }
+
+  // Rental Income operations
+  insertRentalIncome(
+    año: number,
+    mes: number,
+    precioAlquilerARS: number,
+    valorUSD: number,
+    gananciaUSD: number
+  ): number {
+    const stmt = this.db.prepare(`
+      INSERT INTO rental_incomes (año, mes, precio_alquiler_ars, valor_usd, ganancia_usd)
+      VALUES (?, ?, ?, ?, ?)
+    `);
+    const result = stmt.run(
+      año,
+      mes,
+      precioAlquilerARS,
+      valorUSD,
+      gananciaUSD
+    );
+    return Number(result.lastInsertRowid);
+  }
+
+  getAllRentalIncomes() {
+    const stmt = this.db.prepare(
+      "SELECT * FROM rental_incomes ORDER BY año ASC, mes ASC"
+    );
+    return stmt.all() as any[];
+  }
+
+  getRentalIncomeById(id: number) {
+    const stmt = this.db.prepare("SELECT * FROM rental_incomes WHERE id = ?");
+    return stmt.get(id) as any;
+  }
+
+  updateRentalIncome(
+    id: number,
+    updates: {
+      año?: number;
+      mes?: number;
+      precioAlquilerARS?: number;
+      valorUSD?: number;
+      gananciaUSD?: number;
+    }
+  ): boolean {
+    const fields: string[] = [];
+    const values: any[] = [];
+
+    if (updates.año !== undefined) {
+      fields.push("año = ?");
+      values.push(updates.año);
+    }
+    if (updates.mes !== undefined) {
+      fields.push("mes = ?");
+      values.push(updates.mes);
+    }
+    if (updates.precioAlquilerARS !== undefined) {
+      fields.push("precio_alquiler_ars = ?");
+      values.push(updates.precioAlquilerARS);
+    }
+    if (updates.valorUSD !== undefined) {
+      fields.push("valor_usd = ?");
+      values.push(updates.valorUSD);
+    }
+    if (updates.gananciaUSD !== undefined) {
+      fields.push("ganancia_usd = ?");
+      values.push(updates.gananciaUSD);
+    }
+
+    if (fields.length === 0) return false;
+
+    fields.push("updated_at = CURRENT_TIMESTAMP");
+    values.push(id);
+    const stmt = this.db.prepare(
+      `UPDATE rental_incomes SET ${fields.join(", ")} WHERE id = ?`
+    );
+    const result = stmt.run(...values);
+    return result.changes > 0;
+  }
+
+  deleteRentalIncome(id: number): boolean {
+    const stmt = this.db.prepare("DELETE FROM rental_incomes WHERE id = ?");
+    const result = stmt.run(id);
+    return result.changes > 0;
+  }
+
+  // Backup and restore operations
+  createBackup(backupPath: string): boolean {
+    try {
+      // Close the database connection to ensure all data is written
+      this.db.close();
+      
+      // Copy the database file
+      fs.copyFileSync(this.dbPath, backupPath);
+      
+      // Also copy the encryption key if it exists
+      const keyPath = path.join(path.dirname(this.dbPath), ".encryption_key");
+      if (fs.existsSync(keyPath)) {
+        const backupKeyPath = path.join(
+          path.dirname(backupPath),
+          `.encryption_key_${path.basename(backupPath)}`
+        );
+        fs.copyFileSync(keyPath, backupKeyPath);
+      }
+      
+      // Reopen the database connection
+      this.db = new Database(this.dbPath);
+      
+      return true;
+    } catch (error) {
+      console.error("Error creating backup:", error);
+      // Try to reopen the database even if backup failed
+      try {
+        this.db = new Database(this.dbPath);
+      } catch (reopenError) {
+        console.error("Error reopening database:", reopenError);
+      }
+      return false;
+    }
+  }
+
+  restoreFromBackup(backupPath: string): boolean {
+    try {
+      // Close the current database connection
+      this.db.close();
+      
+      // Backup the current database before restoring (safety measure)
+      const safetyBackupPath = `${this.dbPath}.safety-backup-${Date.now()}`;
+      if (fs.existsSync(this.dbPath)) {
+        fs.copyFileSync(this.dbPath, safetyBackupPath);
+      }
+      
+      // Copy the backup file to the database location
+      fs.copyFileSync(backupPath, this.dbPath);
+      
+      // Try to restore the encryption key if it exists
+      const backupKeyPath = path.join(
+        path.dirname(backupPath),
+        `.encryption_key_${path.basename(backupPath)}`
+      );
+      if (fs.existsSync(backupKeyPath)) {
+        const keyPath = path.join(path.dirname(this.dbPath), ".encryption_key");
+        fs.copyFileSync(backupKeyPath, keyPath);
+        // Reload the encryption key
+        this.encryptionKey = this.getOrCreateEncryptionKey();
+      }
+      
+      // Reopen the database connection
+      this.db = new Database(this.dbPath);
+      
+      // Reinitialize tables in case of schema changes
+      this.initializeTables();
+      
+      return true;
+    } catch (error) {
+      console.error("Error restoring from backup:", error);
+      // Try to reopen the database even if restore failed
+      try {
+        this.db = new Database(this.dbPath);
+      } catch (reopenError) {
+        console.error("Error reopening database:", reopenError);
+      }
+      return false;
+    }
+  }
+
+  getDatabasePath(): string {
+    return this.dbPath;
+  }
+
+  // User operations
+  insertUser(username: string, passwordHash: string): number {
+    const stmt = this.db.prepare(`
+      INSERT INTO users (username, password_hash)
+      VALUES (?, ?)
+    `);
+    const result = stmt.run(username, passwordHash);
+    return Number(result.lastInsertRowid);
+  }
+
+  getUserByUsername(username: string) {
+    const stmt = this.db.prepare("SELECT * FROM users WHERE username = ?");
+    return stmt.get(username) as any;
+  }
+
+  updateUserPassword(username: string, passwordHash: string): boolean {
+    const stmt = this.db.prepare(`
+      UPDATE users 
+      SET password_hash = ?, updated_at = CURRENT_TIMESTAMP
+      WHERE username = ?
+    `);
+    const result = stmt.run(passwordHash, username);
+    return result.changes > 0;
+  }
+
+  hasUsers(): boolean {
+    const stmt = this.db.prepare("SELECT COUNT(*) as count FROM users");
+    const result = stmt.get() as { count: number };
+    return result.count > 0;
   }
 
   close() {

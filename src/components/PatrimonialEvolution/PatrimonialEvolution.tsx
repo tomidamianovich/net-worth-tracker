@@ -398,23 +398,28 @@ function PatrimonialEvolution() {
 
   return (
     <div className="patrimonial-evolution">
-      <div className="patrimonial-header">
-        <h1>{t("evolution.title")}</h1>
+      <div className="view-header patrimonial-header">
+        <div className="view-header-text patrimonial-header-text">
+          <h1>{t("evolution.title")}</h1>
+          <p className="view-subtitle">
+            {t("evolution.subtitle") || t("portfolio.subtitle")}
+          </p>
+        </div>
         <button
-          className="btn-add-record"
-          onClick={() => {
-            setEditingRecord(null);
-            setFormData({
-              año: new Date().getFullYear(),
-              mes: new Date().getMonth() + 1,
-              dia: new Date().getDate(),
-              patrimonio: "",
-              detalle: "",
-            });
-            setShowAddModal(true);
-          }}
+          className="btn-add-circular"
+          onClick={() => setShowAddModal(true)}
         >
-          + {t("evolution.addNew")}
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
         </button>
       </div>
 
@@ -559,7 +564,9 @@ function PatrimonialEvolution() {
         <div className="modal-overlay" onClick={handleCloseModal}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h2>{editingRecord ? t("evolution.edit") : t("evolution.addNew")}</h2>
+              <h2>
+                {editingRecord ? t("evolution.edit") : t("evolution.addNew")}
+              </h2>
               <button className="modal-close" onClick={handleCloseModal}>
                 ×
               </button>
@@ -664,4 +671,3 @@ function PatrimonialEvolution() {
 }
 
 export default PatrimonialEvolution;
-

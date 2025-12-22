@@ -16,3 +16,11 @@ export interface Category {
   color: string;
 }
 
+export interface AssetData {
+  concepto: string;
+  tipo: "ACCION" | "ETF" | "CRIPTO" | "FIAT" | "DEPOSITO";
+  total: number;
+  porcentaje: number;
+  color: string;
+}
+

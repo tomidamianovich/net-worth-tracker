@@ -7,6 +7,11 @@ function Header({
   onViewChange,
   onExport,
   onImport,
+  onBackup,
+  onRestore,
+  onChangePassword,
+  onCategories,
+  currentUser,
 }: HeaderProps) {
   const { t } = useTranslation();
 
@@ -25,14 +30,6 @@ function Header({
             </button>
             <button
               className={`nav-item ${
-                currentView === ViewType.Analysis ? "active" : ""
-              }`}
-              onClick={() => onViewChange(ViewType.Analysis)}
-            >
-              {t("nav.analysis")}
-            </button>
-            <button
-              className={`nav-item ${
                 currentView === ViewType.Evolution ? "active" : ""
               }`}
               onClick={() => onViewChange(ViewType.Evolution)}
@@ -41,16 +38,76 @@ function Header({
             </button>
             <button
               className={`nav-item ${
-                currentView === ViewType.Categories ? "active" : ""
+                currentView === ViewType.PropertyInvestment ? "active" : ""
               }`}
-              onClick={() => onViewChange(ViewType.Categories)}
+              onClick={() => onViewChange(ViewType.PropertyInvestment)}
             >
-              {t("nav.categories")}
+              {t("nav.propertyInvestment")}
             </button>
           </div>
         </nav>
       </div>
       <div className="header-right">
+        <div className="user-info">
+          <span className="username">{currentUser}</span>
+        </div>
+        <button className="icon-btn" onClick={onCategories} title={t("nav.categories")}>
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+        </button>
+        <button className="icon-btn" onClick={onChangePassword} title={t("nav.changePassword")}>
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
+            <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path>
+          </svg>
+        </button>
+        <button className="icon-btn" onClick={onBackup} title={t("nav.backup")}>
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
+            <path d="M21 16v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="7" cy="7" r="4"></circle>
+            <path d="M16 21v-2a4 4 0 0 1 4-4h2"></path>
+            <path d="M21 21v-2a4 4 0 0 0-4-4h-2"></path>
+          </svg>
+        </button>
+        <button className="icon-btn" onClick={onRestore} title={t("nav.restore")}>
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
+            <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path>
+            <path d="M21 3v5h-5"></path>
+            <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path>
+            <path d="M3 21v-5h5"></path>
+          </svg>
+        </button>
         <button className="icon-btn" onClick={onImport} title={t("nav.import")}>
           <svg
             width="16"

@@ -40,3 +40,4 @@ lerna-debug.log*
 *.db-shm
 *.db-wal
 .encryption_key
+*release*

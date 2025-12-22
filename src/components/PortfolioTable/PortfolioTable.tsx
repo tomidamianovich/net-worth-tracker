@@ -4,7 +4,7 @@ import { FaBitcoin, FaEuroSign, FaEthereum } from "react-icons/fa";
 import { AiOutlineGold } from "react-icons/ai";
 import { CiBank } from "react-icons/ci";
 import EditAssetModal from "../EditAssetModal";
-import { PortfolioAsset, FilterType, Category } from "./types";
+import { PortfolioAsset, FilterType, Category, AssetData } from "./types";
 import { useTranslation } from "../../i18n/hooks";
 import "./PortfolioTable.css";
 
@@ -16,6 +16,7 @@ function PortfolioTable() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<FilterType>("Todos");
   const [categories, setCategories] = useState<Category[]>([]);
+  const [updatingAssetId, setUpdatingAssetId] = useState<number | null>(null);
 
   useEffect(() => {
     loadAssets();
@@ -135,6 +136,122 @@ function PortfolioTable() {
     return category ? category.nombre : tipo;
   };
 
+  const getTipoColor = (tipo: string): string => {
+    const category = categories.find((cat) => cat.tipo === tipo);
+    return category ? category.color : "#808080";
+  };
+
+  const getTipoName = (tipo: string): string => {
+    const category = categories.find((cat) => cat.tipo === tipo);
+    return category ? category.nombre : tipo;
+  };
+
+  const calculateAssetDistribution = (): AssetData[] => {
+    const totalPortfolio = assets.reduce(
+      (sum, asset) => sum + asset.totalActual,
+      0
+    );
+    const tipoMap = new Map<string, number>();
+
+    assets.forEach((asset) => {
+      const tipo = asset.tipo || "ACCION";
+      tipoMap.set(tipo, (tipoMap.get(tipo) || 0) + asset.totalActual);
+    });
+
+    return Array.from(tipoMap.entries())
+      .map(([tipo, total]) => ({
+        concepto: getTipoName(tipo),
+        tipo: tipo as AssetData["tipo"],
+        total,
+        porcentaje: totalPortfolio > 0 ? (total / totalPortfolio) * 100 : 0,
+        color: getTipoColor(tipo),
+      }))
+      .sort((a, b) => b.total - a.total);
+  };
+
+  const renderPieChart = (data: AssetData[]) => {
+    if (data.length === 0) return null;
+
+    const size = 350;
+    const radius = size / 2 - 30;
+    const centerX = size / 2;
+    const centerY = size / 2;
+    const labelRadius = radius * 0.65;
+
+    let currentAngle = -90;
+
+    const segments = data.map((item) => {
+      const angle = (item.porcentaje / 100) * 360;
+      const startAngle = currentAngle;
+      const endAngle = currentAngle + angle;
+      const midAngle = (startAngle + endAngle) / 2;
+      currentAngle = endAngle;
+
+      const startAngleRad = (startAngle * Math.PI) / 180;
+      const endAngleRad = (endAngle * Math.PI) / 180;
+      const midAngleRad = (midAngle * Math.PI) / 180;
+
+      const x1 = centerX + radius * Math.cos(startAngleRad);
+      const y1 = centerY + radius * Math.sin(startAngleRad);
+      const x2 = centerX + radius * Math.cos(endAngleRad);
+      const y2 = centerY + radius * Math.sin(endAngleRad);
+
+      const pathData = [
+        `M ${centerX} ${centerY}`,
+        `L ${x1} ${y1}`,
+        `A ${radius} ${radius} 0 ${angle > 180 ? 1 : 0} 1 ${x2} ${y2}`,
+        "Z",
+      ].join(" ");
+
+      const labelX = centerX + labelRadius * Math.cos(midAngleRad);
+      const labelY = centerY + labelRadius * Math.sin(midAngleRad);
+      let textRotation = midAngle;
+      if (textRotation > 90 && textRotation < 270) textRotation += 180;
+
+      const label =
+        item.concepto.length > 15
+          ? item.concepto.substring(0, 12) + "..."
+          : item.concepto;
+
+      const showLabel = item.porcentaje > 2;
+
+      return {
+        path: (
+          <path
+            key={item.tipo}
+            d={pathData}
+            fill={item.color}
+            stroke="#ffffff"
+            strokeWidth="2"
+          />
+        ),
+        label: showLabel ? (
+          <text
+            key={`label-${item.tipo}`}
+            x={labelX}
+            y={labelY}
+            textAnchor="middle"
+            dominantBaseline="middle"
+            fill="#1d1d1f"
+            fontSize="12"
+            fontWeight="500"
+            transform={`rotate(${textRotation}, ${labelX}, ${labelY})`}
+            style={{ pointerEvents: "none" }}
+          >
+            {label}
+          </text>
+        ) : null,
+      };
+    });
+
+    return (
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+        {segments.map((s) => s.path)}
+        {segments.map((s) => s.label)}
+      </svg>
+    );
+  };
+
   const calculatePortfolioData = (rawAssets: Asset[]): PortfolioAsset[] => {
     const totalPortfolio = rawAssets.reduce(
       (sum, asset) => sum + asset.cantidad * asset.valor_unitario,
@@ -164,7 +281,12 @@ function PortfolioTable() {
     setEditingAsset(asset);
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: number | undefined) => {
+    if (!id) {
+      alert(t("assetModal.errorDeleting"));
+      return;
+    }
+
     if (!confirm(t("portfolio.asset.deleteConfirm"))) return;
 
     try {
@@ -172,11 +294,88 @@ function PortfolioTable() {
         alert("electronAPI is not available");
         return;
       }
-      await window.electronAPI.deleteAsset(id);
+      const result = await window.electronAPI.deleteAsset(id);
+      if (!result) {
+        throw new Error("Failed to delete asset");
+      }
       await loadAssets();
     } catch (error) {
       console.error("Error deleting asset:", error);
       alert(t("assetModal.errorDeleting"));
+    }
+  };
+
+  const canUpdateAsset = (asset: PortfolioAsset): boolean => {
+    if (asset.tipo === "CRIPTO") {
+      const symbol = getAssetSymbol(asset.concepto);
+      const concepto = asset.concepto.toUpperCase();
+      return (
+        isBitcoin(asset.tipo, symbol, asset.concepto) ||
+        isEthereum(asset.tipo, symbol, asset.concepto) ||
+        concepto.includes("LTC") ||
+        concepto.includes("XRP") ||
+        concepto.includes("ADA") ||
+        concepto.includes("DOT") ||
+        concepto.includes("SOL") ||
+        concepto.includes("MATIC")
+      );
+    }
+    if (asset.tipo === "ETF" || asset.tipo === "ACCION") {
+      const symbol = getAssetSymbol(asset.concepto);
+      return isGold(symbol, asset.concepto);
+    }
+    return false;
+  };
+
+  const handleUpdateAsset = async (asset: PortfolioAsset) => {
+    if (!asset.id) {
+      alert(t("assetModal.errorUpdating") || "Error: Asset ID not found");
+      return;
+    }
+
+    setUpdatingAssetId(asset.id);
+
+    try {
+      if (!window.electronAPI) {
+        alert(t("messages.electronNotAvailable"));
+        return;
+      }
+
+      if (asset.tipo === "CRIPTO") {
+        if (!window.electronAPI.updateAssetWithCryptoPrice) {
+          alert(
+            t("assetModal.updateNotSupported") || "Crypto update not available"
+          );
+          return;
+        }
+        await window.electronAPI.updateAssetWithCryptoPrice(asset.id);
+      } else if (isGold(getAssetSymbol(asset.concepto), asset.concepto)) {
+        if (!window.electronAPI.updateAssetWithGoldPrice) {
+          alert(
+            t("assetModal.updateNotSupported") || "Gold update not available"
+          );
+          return;
+        }
+        await window.electronAPI.updateAssetWithGoldPrice(asset.id);
+      } else {
+        alert(
+          t("assetModal.updateNotSupported") ||
+            "Update not supported for this asset type"
+        );
+        return;
+      }
+
+      await loadAssets();
+    } catch (error) {
+      console.error("Error updating asset:", error);
+      alert(
+        t("assetModal.errorUpdating") ||
+          `Error updating asset: ${
+            error instanceof Error ? error.message : "Unknown error"
+          }`
+      );
+    } finally {
+      setUpdatingAssetId(null);
     }
   };
 
@@ -253,6 +452,21 @@ function PortfolioTable() {
     );
   });
 
+  const totalPortfolioFiltered = filteredAssets.reduce(
+    (sum, asset) => sum + asset.totalActual,
+    0
+  );
+
+  const filteredAssetsWithRecalculatedPercentage = filteredAssets
+    .map((asset) => ({
+      ...asset,
+      porcentajeCartera:
+        totalPortfolioFiltered !== 0
+          ? (asset.totalActual / totalPortfolioFiltered) * 100
+          : 0,
+    }))
+    .sort((a, b) => b.porcentajeCartera - a.porcentajeCartera);
+
   const getCategoryCount = (filterType: FilterType): number => {
     if (filterType === "Todos") return assets.length;
     return assets.filter(
@@ -262,20 +476,28 @@ function PortfolioTable() {
     ).length;
   };
 
-  const totalVariacion = filteredAssets.reduce(
+  const totalPortfolioCompleto = assets.reduce(
+    (sum, asset) => sum + asset.totalActual,
+    0
+  );
+
+  const totalVariacion = filteredAssetsWithRecalculatedPercentage.reduce(
     (sum, asset) => sum + asset.variacionEur,
     0
   );
-  const totalValorInicial = filteredAssets.reduce(
+  const totalValorInicial = filteredAssetsWithRecalculatedPercentage.reduce(
     (sum, asset) => sum + asset.cantidad * asset.valor,
     0
   );
   const totalVariacionPercentCalc =
     totalValorInicial !== 0 ? (totalVariacion / totalValorInicial) * 100 : 0;
-  const totalPortfolio = filteredAssets.reduce(
-    (sum, asset) => sum + asset.totalActual,
-    0
-  );
+  const totalPortfolio = totalPortfolioFiltered;
+  const portfolioPercentage =
+    filter === "Todos"
+      ? 100
+      : totalPortfolioCompleto !== 0
+      ? (totalPortfolioFiltered / totalPortfolioCompleto) * 100
+      : 0;
 
   if (loading) {
     return (
@@ -288,10 +510,134 @@ function PortfolioTable() {
 
   return (
     <div className="portfolio-container">
-      <div className="portfolio-header">
-        <div className="portfolio-header-text">
+      <div className="view-header portfolio-header">
+        <div className="view-header-text portfolio-header-text">
           <h1>{t("portfolio.title")}</h1>
-          <p className="portfolio-subtitle">{t("portfolio.subtitle")}</p>
+          <p className="view-subtitle portfolio-subtitle">
+            {t("portfolio.subtitle")}
+          </p>
+        </div>
+      </div>
+      <div className="portfolio-summary-section">
+        <div className="portfolio-summary-card">
+          <div className="summary-main">
+            <div className="summary-label">{t("portfolio.totalValue")}</div>
+            <div className="summary-value">
+              {formatCurrency(totalPortfolio)}
+            </div>
+          </div>
+          <div className="summary-details-row">
+            <div className="summary-detail">
+              <span className="detail-label">{t("portfolio.variation")} %</span>
+              <div
+                className={`detail-value variation-percent ${
+                  totalVariacionPercentCalc > 0
+                    ? "positive"
+                    : totalVariacionPercentCalc < 0
+                    ? "negative"
+                    : ""
+                }`}
+              >
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <polyline points="18 15 12 9 6 15"></polyline>
+                </svg>
+                {formatPercentage(totalVariacionPercentCalc)}
+              </div>
+            </div>
+            <div className="summary-detail">
+              <span className="detail-label">{t("portfolio.variation")} €</span>
+              <span
+                className={`detail-value ${
+                  totalVariacion > 0
+                    ? "positive"
+                    : totalVariacion < 0
+                    ? "negative"
+                    : ""
+                }`}
+              >
+                {formatCurrencyWithSign(totalVariacion)}
+              </span>
+            </div>
+            <div className="summary-detail">
+              <span className="detail-label">
+                {t("portfolio.portfolioPercentage")}
+              </span>
+              <span className="detail-value">
+                {formatNumber(portfolioPercentage, 2)}%
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {assets.length > 0 && (
+          <div className="portfolio-analysis-section">
+            <div className="analysis-chart-wrapper">
+              <div className="analysis-chart-container">
+                {renderPieChart(calculateAssetDistribution())}
+              </div>
+            </div>
+
+            <div className="analysis-right-column">
+              <div className="analysis-legend">
+                <h2>{t("analysis.distribution")}</h2>
+                <div className="legend-items">
+                  {calculateAssetDistribution().map((item) => (
+                    <div key={item.tipo} className="analysis-legend-item">
+                      <div
+                        className="legend-color"
+                        style={{ backgroundColor: item.color }}
+                      ></div>
+                      <div className="legend-info">
+                        <div className="legend-name">{item.concepto}</div>
+                        <div className="legend-details">
+                          {formatCurrency(item.total)} •{" "}
+                          {formatNumber(item.porcentaje, 1)}%
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+      <div className="portfolio-actions-container">
+        <div className="portfolio-filters">
+          {(
+            [
+              "Todos",
+              "ACCION",
+              "ETF",
+              "CRIPTO",
+              "FIAT",
+              "DEPOSITO",
+            ] as FilterType[]
+          ).map((filterType) => {
+            const count = getCategoryCount(filterType);
+            const isDisabled = count === 0;
+            return (
+              <button
+                key={filterType}
+                className={`filter-btn ${
+                  filter === filterType ? "active" : ""
+                } ${isDisabled ? "disabled" : ""}`}
+                onClick={() => setFilter(filterType)}
+                disabled={isDisabled}
+              >
+                {filterType === "Todos"
+                  ? `${t("portfolio.filters.all")} (${count})`
+                  : `${getTipoDisplayName(filterType)} (${count})`}
+              </button>
+            );
+          })}
         </div>
         <button
           className="btn-add-circular"
@@ -311,88 +657,8 @@ function PortfolioTable() {
         </button>
       </div>
 
-      <div className="portfolio-summary-card">
-        <div className="summary-main">
-          <div className="summary-label">{t("portfolio.totalValue")}</div>
-          <div className="summary-value">{formatCurrency(totalPortfolio)}</div>
-          <div
-            className={`summary-change ${
-              totalVariacionPercentCalc > 0
-                ? "positive"
-                : totalVariacionPercentCalc < 0
-                ? "negative"
-                : ""
-            }`}
-          >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <polyline points="18 15 12 9 6 15"></polyline>
-            </svg>
-            {formatPercentage(totalVariacionPercentCalc)}
-          </div>
-        </div>
-        <div className="summary-details">
-          <div className="summary-detail">
-            <span className="detail-label">{t("portfolio.variation")}</span>
-            <span
-              className={`detail-value ${
-                totalVariacion > 0
-                  ? "positive"
-                  : totalVariacion < 0
-                  ? "negative"
-                  : ""
-              }`}
-            >
-              {formatCurrencyWithSign(totalVariacion)}
-            </span>
-          </div>
-          <div className="summary-detail">
-            <span className="detail-label">
-              {t("portfolio.portfolioPercentage")}
-            </span>
-            <span className="detail-value">100,00%</span>
-          </div>
-        </div>
-      </div>
-
-      <div className="portfolio-filters">
-        {(
-          [
-            "Todos",
-            "ACCION",
-            "ETF",
-            "CRIPTO",
-            "FIAT",
-            "DEPOSITO",
-          ] as FilterType[]
-        ).map((filterType) => {
-          const count = getCategoryCount(filterType);
-          const isDisabled = count === 0;
-          return (
-            <button
-              key={filterType}
-              className={`filter-btn ${filter === filterType ? "active" : ""} ${
-                isDisabled ? "disabled" : ""
-              }`}
-              onClick={() => setFilter(filterType)}
-              disabled={isDisabled}
-            >
-              {filterType === "Todos"
-                ? `${t("portfolio.filters.all")} (${count})`
-                : `${getTipoDisplayName(filterType)} (${count})`}
-            </button>
-          );
-        })}
-      </div>
-
       <div className="portfolio-assets">
-        {filteredAssets.map((asset) => {
+        {filteredAssetsWithRecalculatedPercentage.map((asset) => {
           const symbol = getAssetSymbol(asset.concepto);
           const name = getAssetName(asset.concepto);
           const iconColor = getAssetIconColor(
@@ -437,21 +703,6 @@ function PortfolioTable() {
                 </div>
               </div>
               <div className="asset-card-right">
-                <div className="asset-value">
-                  {formatCurrency(asset.totalActual)}
-                </div>
-                <div
-                  className={`asset-change ${
-                    asset.variacion > 0
-                      ? "positive"
-                      : asset.variacion < 0
-                      ? "negative"
-                      : ""
-                  }`}
-                >
-                  {asset.variacion > 0 ? "• " : ""}
-                  {formatPercentage(asset.variacion)}
-                </div>
                 <div className="asset-metrics">
                   <div className="metric">
                     <span className="metric-label">
@@ -463,7 +714,7 @@ function PortfolioTable() {
                   </div>
                   <div className="metric">
                     <span className="metric-label">
-                      {t("portfolio.asset.cost")}
+                      {t("portfolio.asset.initialInvestment")}
                     </span>
                     <span className="metric-value">
                       {formatCurrency(asset.cantidad * asset.valor)}
@@ -487,40 +738,114 @@ function PortfolioTable() {
                   </div>
                   <div className="metric">
                     <span className="metric-label">
-                      {t("portfolio.asset.variation")}
+                      {t("portfolio.asset.variation")} %
                     </span>
-                    <span
-                      className={`metric-value ${
-                        asset.variacionEur > 0
-                          ? "positive"
-                          : asset.variacionEur < 0
-                          ? "negative"
-                          : ""
-                      }`}
-                    >
-                      {formatCurrencyWithSign(asset.variacionEur)}
-                    </span>
+                    <div className="metric-value-row">
+                      <span
+                        className={`metric-value ${
+                          asset.variacion > 0
+                            ? "positive"
+                            : asset.variacion < 0
+                            ? "negative"
+                            : ""
+                        }`}
+                      >
+                        {asset.variacion > 0 ? "+" : ""}
+                        {formatNumber(asset.variacion, 2)}%
+                      </span>
+                    </div>
                   </div>
+                  <div className="metric">
+                    <span className="metric-label">
+                      {t("portfolio.asset.variation")} €
+                    </span>
+                    <div className="metric-value-row">
+                      <span
+                        className={`metric-value ${
+                          asset.variacionEur > 0
+                            ? "positive"
+                            : asset.variacionEur < 0
+                            ? "negative"
+                            : ""
+                        }`}
+                      >
+                        {formatCurrencyWithSign(asset.variacionEur)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <div className="asset-value">
+                  {formatCurrency(asset.totalActual)}
                 </div>
                 <div className="asset-actions">
                   <button
-                    className="asset-action-btn"
-                    onClick={() => handleEdit(asset)}
+                    className="asset-action-btn-icon"
+                    onClick={() => handleUpdateAsset(asset)}
+                    disabled={
+                      updatingAssetId === asset.id ||
+                      !asset.id ||
+                      !canUpdateAsset(asset)
+                    }
+                    title={
+                      t("portfolio.asset.updatePrice") || "Actualizar precio"
+                    }
                   >
-                    {t("common.edit")}
+                    {updatingAssetId === asset.id ? (
+                      <div className="loading-spinner-small"></div>
+                    ) : (
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      >
+                        <polyline points="23 4 23 10 17 10"></polyline>
+                        <polyline points="1 20 1 14 7 14"></polyline>
+                        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                      </svg>
+                    )}
                   </button>
                   <button
-                    className="asset-action-btn delete"
-                    onClick={() => handleDelete(asset.id!)}
+                    className="asset-action-btn-icon"
+                    onClick={() => handleEdit(asset)}
                   >
-                    {t("common.delete")}
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                    </svg>
+                  </button>
+                  <button
+                    className="asset-action-btn-icon delete"
+                    onClick={() => handleDelete(asset.id)}
+                    disabled={!asset.id}
+                  >
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <polyline points="3 6 5 6 21 6"></polyline>
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    </svg>
                   </button>
                 </div>
               </div>
             </div>
           );
         })}
-        {filteredAssets.length === 0 && (
+        {filteredAssetsWithRecalculatedPercentage.length === 0 && (
           <div className="empty-portfolio">
             <p>{t("portfolio.empty")}</p>
           </div>

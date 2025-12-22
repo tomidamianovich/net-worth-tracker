@@ -5,5 +5,10 @@ export interface HeaderProps {
   onViewChange: (view: ViewType) => void;
   onExport: () => void;
   onImport: () => void;
+  onBackup: () => void;
+  onRestore: () => void;
+  onChangePassword: () => void;
+  onCategories: () => void;
+  currentUser: string;
 }
 

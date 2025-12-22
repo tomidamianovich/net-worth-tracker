@@ -237,7 +237,9 @@ function CategoriesManager() {
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h2>
-                {editingCategory ? t("categories.edit") : t("categories.addNew")}
+                {editingCategory
+                  ? t("categories.edit")
+                  : t("categories.addNew")}
               </h2>
               <button className="modal-close" onClick={handleCloseModal}>
                 ×
@@ -345,4 +347,3 @@ function CategoriesManager() {
 }
 
 export default CategoriesManager;
-

@@ -26,6 +26,33 @@
   background-color: var(--color-border-hover);
 }
 
+/* Unified View Header Styles */
+.view-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--spacing-2xl);
+}
+
+.view-header-text h1 {
+  margin: 0 0 var(--spacing-md) 0;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-4xl);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--letter-spacing-tight);
+  line-height: var(--line-height-tight);
+}
+
+.view-subtitle {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-normal);
+  letter-spacing: var(--letter-spacing-relaxed);
+  line-height: var(--line-height-loose);
+}
+
+/* Legacy class names for backward compatibility */
 .portfolio-header {
   display: flex;
   justify-content: space-between;
@@ -72,12 +99,160 @@
   box-shadow: var(--shadow-primary-hover);
 }
 
+.portfolio-summary-section {
+  display: flex;
+  flex-direction: row;
+  gap: var(--spacing-2xl);
+  margin-bottom: var(--spacing-2xl);
+}
+
 .portfolio-summary-card {
   background-color: var(--color-bg-primary);
   border-radius: var(--radius-xl);
   padding: var(--spacing-2xl);
-  margin-bottom: var(--spacing-2xl);
   box-shadow: var(--shadow-sm);
+  flex: 0 0 40%;
+  height: 100%;
+}
+
+.portfolio-analysis-section {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  height: 100%;
+}
+
+.analysis-chart-wrapper {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  justify-content: center;
+}
+
+.analysis-right-column {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  gap: 24px;
+}
+
+.analysis-chart-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  width: 100%;
+  height: 100%;
+}
+
+.analysis-chart-container svg {
+  max-width: 100%;
+  height: 100%;
+}
+
+.analysis-legend {
+  flex: 1;
+  min-width: 300px;
+  max-height: 600px;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.analysis-legend h2 {
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  color: #1d1d1f;
+  letter-spacing: -0.01em;
+  flex-shrink: 0;
+}
+
+.legend-items {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.analysis-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 0;
+  border-bottom: 1px solid #f5f5f5;
+}
+
+.analysis-legend-item:last-child {
+  border-bottom: none;
+}
+
+.legend-color {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.legend-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.legend-name {
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  color: #1d1d1f;
+  margin-bottom: 4px;
+}
+
+.legend-details {
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  font-size: 14px;
+  color: #86868b;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+@media (max-width: 768px) {
+  .portfolio-analysis-section {
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .analysis-chart-wrapper {
+    width: 100%;
+    min-width: auto;
+  }
+
+  .analysis-chart-container {
+    width: 100%;
+    padding: 24px;
+  }
+
+  .analysis-legend {
+    width: 100%;
+    max-height: 400px;
+  }
 }
 
 .summary-main {
@@ -127,17 +302,36 @@
   color: #f44336;
 }
 
-.summary-details {
+.summary-change.negative svg {
+  transform: rotate(180deg);
+}
+
+.summary-details-row {
   display: flex;
-  gap: 24px;
+  gap: 32px;
   padding-top: 16px;
-  border-top: 1px solid #e0e0e0;
+  align-items: flex-start;
+  flex-direction: column;
 }
 
 .summary-detail {
   display: flex;
   flex-direction: column;
   gap: 4px;
+}
+
+.detail-value.variation-percent {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.detail-value.variation-percent svg {
+  flex-shrink: 0;
+}
+
+.detail-value.variation-percent.negative svg {
+  transform: rotate(180deg);
 }
 
 .detail-label {
@@ -167,7 +361,6 @@
 .portfolio-filters {
   display: flex;
   gap: 8px;
-  margin-bottom: 24px;
 }
 
 .filter-btn {
@@ -176,7 +369,7 @@
   border-radius: 8px;
   background-color: white;
   color: #666;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
@@ -215,6 +408,7 @@
   border-radius: 12px;
   padding: 20px;
   display: flex;
+  gap: 16px;
   justify-content: space-between;
   align-items: flex-start;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
@@ -227,7 +421,7 @@
 
 .asset-card-left {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 16px;
   flex: 1;
 }
@@ -255,7 +449,6 @@
   font-size: 17px;
   font-weight: 600;
   color: #1a1a1a;
-  margin-bottom: 6px;
   letter-spacing: -0.02em;
   line-height: 1.4;
 }
@@ -264,24 +457,33 @@
   font-size: 14px;
   color: #666;
   font-weight: 400;
-
+  margin-top: 3px;
   letter-spacing: -0.01em;
-  line-height: 1.5;
 }
 
 .asset-card-right {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: flex-end;
-  gap: 8px;
+  gap: 32px;
 }
 
 .asset-value {
-  font-size: 22px;
-  font-weight: 700;
+  font-size: 20px;
+  font-weight: 600;
   color: #1a1a1a;
   letter-spacing: -0.03em;
   line-height: 1.2;
+  background: var(--color-bg-secondary);
+  border-radius: 5px;
+  padding: 7px 10px;
+}
+
+.asset-variation-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 4px;
 }
 
 .asset-change {
@@ -297,6 +499,30 @@
 
 .asset-change.negative {
   color: #f44336;
+}
+
+.asset-change-eur {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+
+.asset-change-eur.positive {
+  color: #4caf50;
+}
+
+.asset-change-eur.negative {
+  color: #f44336;
+}
+
+.asset-portfolio-percentage {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+  color: #666;
+  margin-left: auto;
 }
 
 .asset-metrics {
@@ -319,6 +545,8 @@
   letter-spacing: 0.8px;
   font-weight: 600;
   line-height: 1.3;
+  width: 100%;
+  text-align: center;
 }
 
 .metric-value {
@@ -327,6 +555,8 @@
   color: #1a1a1a;
   letter-spacing: -0.02em;
   line-height: 1.3;
+  width: 100%;
+  text-align: center;
 }
 
 .metric-value.positive {
@@ -337,10 +567,45 @@
   color: #f44336;
 }
 
+.metric-value-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
 .asset-actions {
   display: flex;
   gap: 8px;
   margin-top: 12px;
+  align-items: center;
+}
+
+.asset-action-btn-icon {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background-color: white;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.asset-action-btn-icon:hover:not(:disabled) {
+  background-color: #f5f5f5;
+  border-color: #007aff;
+  color: #007aff;
+}
+
+.asset-action-btn-icon:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .asset-action-btn {
@@ -373,10 +638,28 @@
   border-color: #f44336;
 }
 
+.loading-spinner-small {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(0, 122, 255, 0.3);
+  border-top-color: #007aff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
 .empty-portfolio {
   text-align: center;
   padding: 48px 20px;
   color: #999;
+}
+
+.portfolio-actions-container {
+  display: flex;
+  margin-bottom: 24px;
+}
+
+.portfolio-actions-container button {
+  margin-left: auto;
 }
 
 .portfolio-loading {
