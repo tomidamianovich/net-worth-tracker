@@ -89,6 +89,7 @@
   padding: 24px;
   flex: 1;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  width: 50%;
 }
 
 .chart-container h2 {
@@ -137,6 +138,7 @@
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   height: fit-content;
+  width: 50%;
 }
 
 .patrimonial-table {

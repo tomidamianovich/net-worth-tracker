@@ -10,5 +10,7 @@ export interface HeaderProps {
   onChangePassword: () => void;
   onCategories: () => void;
   currentUser: string;
+  isBlurred: boolean;
+  onToggleBlur: () => void;
 }
 

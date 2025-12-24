@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "../../i18n/hooks";
+import { useBlur } from "../../contexts/BlurContext";
 import { RentalIncome, RentalSummary } from "./types";
 import AddRentalIncomeModal from "./AddRentalIncomeModal";
 import "./PropertyInvestment.css";
 
 function PropertyInvestment() {
   const { t } = useTranslation();
+  const { isBlurred } = useBlur();
   const [incomes, setIncomes] = useState<RentalIncome[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -256,7 +258,9 @@ function PropertyInvestment() {
                   t("propertyInvestment.clickToEdit") || "Click para editar"
                 }
               >
-                {formatCurrency(initialInvestment)}
+                <span className={isBlurred ? "blur-values" : ""}>
+                  {formatCurrency(initialInvestment)}
+                </span>
               </span>
             )}
           </div>
@@ -308,26 +312,38 @@ function PropertyInvestment() {
                         </td>
                       )}
                       <td>{getMonthName(income.mes)}</td>
-                      <td>{formatARS(income.precioAlquilerARS)}</td>
-                      <td>{formatCurrency(income.valorUSD)}</td>
-                      <td>{formatCurrency(income.gananciaUSD)}</td>
+                      <td className={isBlurred ? "blur-values" : ""}>
+                        {formatARS(income.precioAlquilerARS)}
+                      </td>
+                      <td className={isBlurred ? "blur-values" : ""}>
+                        {formatCurrency(income.valorUSD)}
+                      </td>
+                      <td className={isBlurred ? "blur-values" : ""}>
+                        {formatCurrency(income.gananciaUSD)}
+                      </td>
                       {index === 0 && (
                         <>
                           <td
                             rowSpan={yearIncomes.length}
-                            className="summary-cell"
+                            className={`summary-cell ${
+                              isBlurred ? "blur-values" : ""
+                            }`}
                           >
                             {formatCurrency(summary?.promedioMensualUSD || 0)}
                           </td>
                           <td
                             rowSpan={yearIncomes.length}
-                            className="summary-cell"
+                            className={`summary-cell ${
+                              isBlurred ? "blur-values" : ""
+                            }`}
                           >
                             {formatCurrency(summary?.gananciasAnualesUSD || 0)}
                           </td>
                           <td
                             rowSpan={yearIncomes.length}
-                            className="summary-cell"
+                            className={`summary-cell ${
+                              isBlurred ? "blur-values" : ""
+                            }`}
                           >
                             {summary?.gananciaAnualizada
                               ? formatPercentage(summary.gananciaAnualizada)
@@ -335,7 +351,9 @@ function PropertyInvestment() {
                           </td>
                           <td
                             rowSpan={yearIncomes.length}
-                            className="summary-cell"
+                            className={`summary-cell ${
+                              isBlurred ? "blur-values" : ""
+                            }`}
                           >
                             {year === summaries[summaries.length - 1]?.año
                               ? formatCurrency(totalAverage)
@@ -448,7 +466,10 @@ function PropertyInvestment() {
                 <td colSpan={5} className="total-label">
                   {t("propertyInvestment.table.total")}
                 </td>
-                <td className="total-value" colSpan={4}>
+                <td
+                  className={`total-value ${isBlurred ? "blur-values" : ""}`}
+                  colSpan={4}
+                >
                   {formatCurrency(totalFinal)}
                 </td>
               </tr>

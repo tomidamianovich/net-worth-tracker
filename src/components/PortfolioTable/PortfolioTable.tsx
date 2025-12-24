@@ -6,10 +6,12 @@ import { CiBank } from "react-icons/ci";
 import EditAssetModal from "../EditAssetModal";
 import { PortfolioAsset, FilterType, Category, AssetData } from "./types";
 import { useTranslation } from "../../i18n/hooks";
+import { useBlur } from "../../contexts/BlurContext";
 import "./PortfolioTable.css";
 
 function PortfolioTable() {
   const { t } = useTranslation();
+  const { isBlurred } = useBlur();
   const [assets, setAssets] = useState<PortfolioAsset[]>([]);
   const [editingAsset, setEditingAsset] = useState<Asset | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -522,7 +524,7 @@ function PortfolioTable() {
         <div className="portfolio-summary-card">
           <div className="summary-main">
             <div className="summary-label">{t("portfolio.totalValue")}</div>
-            <div className="summary-value">
+            <div className={`summary-value ${isBlurred ? "blur-values" : ""}`}>
               {formatCurrency(totalPortfolio)}
             </div>
           </div>
@@ -536,7 +538,7 @@ function PortfolioTable() {
                     : totalVariacionPercentCalc < 0
                     ? "negative"
                     : ""
-                }`}
+                } ${isBlurred ? "blur-values" : ""}`}
               >
                 <svg
                   width="14"
@@ -560,7 +562,7 @@ function PortfolioTable() {
                     : totalVariacion < 0
                     ? "negative"
                     : ""
-                }`}
+                } ${isBlurred ? "blur-values" : ""}`}
               >
                 {formatCurrencyWithSign(totalVariacion)}
               </span>
@@ -590,7 +592,11 @@ function PortfolioTable() {
                       ></div>
                       <div className="legend-info">
                         <div className="legend-name">{item.concepto}</div>
-                        <div className="legend-details">
+                        <div
+                          className={`legend-details ${
+                            isBlurred ? "blur-values" : ""
+                          }`}
+                        >
                           {formatCurrency(item.total)} •{" "}
                           {formatNumber(item.porcentaje, 1)}%
                         </div>
@@ -691,7 +697,11 @@ function PortfolioTable() {
                 <div className="asset-info">
                   <div className="asset-name">{name}</div>
                   {asset.cantidad !== 1 && (
-                    <div className="asset-details">
+                    <div
+                      className={`asset-details ${
+                        isBlurred ? "blur-values" : ""
+                      }`}
+                    >
                       {formatNumber(
                         asset.cantidad,
                         asset.tipo === "CRIPTO" ? 5 : asset.cantidad < 1 ? 2 : 0
@@ -707,7 +717,11 @@ function PortfolioTable() {
                     <span className="metric-label">
                       {t("portfolio.asset.portfolioPercentage")}
                     </span>
-                    <span className="metric-value">
+                    <span
+                      className={`metric-value ${
+                        isBlurred ? "blur-values" : ""
+                      }`}
+                    >
                       {formatNumber(asset.porcentajeCartera, 1)}%
                     </span>
                   </div>
@@ -715,7 +729,11 @@ function PortfolioTable() {
                     <span className="metric-label">
                       {t("portfolio.asset.initialInvestment")}
                     </span>
-                    <span className="metric-value">
+                    <span
+                      className={`metric-value ${
+                        isBlurred ? "blur-values" : ""
+                      }`}
+                    >
                       {formatCurrency(asset.cantidad * asset.valor)}
                     </span>
                   </div>
@@ -723,7 +741,11 @@ function PortfolioTable() {
                     <span className="metric-label">
                       {t("portfolio.asset.purchaseValue")}
                     </span>
-                    <span className="metric-value">
+                    <span
+                      className={`metric-value ${
+                        isBlurred ? "blur-values" : ""
+                      }`}
+                    >
                       {formatCurrency(asset.valor)}
                     </span>
                   </div>
@@ -731,7 +753,11 @@ function PortfolioTable() {
                     <span className="metric-label">
                       {t("portfolio.asset.currentValue")}
                     </span>
-                    <span className="metric-value">
+                    <span
+                      className={`metric-value ${
+                        isBlurred ? "blur-values" : ""
+                      }`}
+                    >
                       {formatCurrency(asset.valor_unitario)}
                     </span>
                   </div>
@@ -747,7 +773,7 @@ function PortfolioTable() {
                             : asset.variacion < 0
                             ? "negative"
                             : ""
-                        }`}
+                        } ${isBlurred ? "blur-values" : ""}`}
                       >
                         {asset.variacion > 0 ? "+" : ""}
                         {formatNumber(asset.variacion, 2)}%
@@ -766,14 +792,16 @@ function PortfolioTable() {
                             : asset.variacionEur < 0
                             ? "negative"
                             : ""
-                        }`}
+                        } ${isBlurred ? "blur-values" : ""}`}
                       >
                         {formatCurrencyWithSign(asset.variacionEur)}
                       </span>
                     </div>
                   </div>
                 </div>
-                <div className="asset-value">
+                <div
+                  className={`asset-value ${isBlurred ? "blur-values" : ""}`}
+                >
                   {formatCurrency(asset.totalActual)}
                 </div>
                 <div className="asset-actions">

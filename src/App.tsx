@@ -11,6 +11,7 @@ import ChangePasswordModal from "./components/ChangePasswordModal";
 import CategoriesManagerModal from "./components/CategoriesManagerModal";
 import { ViewType } from "./types/views";
 import { useTranslation } from "./i18n/hooks";
+import { BlurProvider } from "./contexts/BlurContext";
 import "./App.css";
 
 declare global {
@@ -94,13 +95,36 @@ declare global {
         }
       ) => Promise<boolean>;
       deleteRentalIncome: (id: number) => Promise<boolean>;
-      createBackup: () => Promise<{ success: boolean; path?: string; error?: string }>;
-      saveBackupAs: () => Promise<{ success: boolean; path?: string; error?: string; canceled?: boolean }>;
-      restoreFromBackup: () => Promise<{ success: boolean; error?: string; canceled?: boolean }>;
-      login: (username: string, password: string) => Promise<{ success: boolean; error?: string }>;
+      createBackup: () => Promise<{
+        success: boolean;
+        path?: string;
+        error?: string;
+      }>;
+      saveBackupAs: () => Promise<{
+        success: boolean;
+        path?: string;
+        error?: string;
+        canceled?: boolean;
+      }>;
+      restoreFromBackup: () => Promise<{
+        success: boolean;
+        error?: string;
+        canceled?: boolean;
+      }>;
+      login: (
+        username: string,
+        password: string
+      ) => Promise<{ success: boolean; error?: string }>;
       hasUsers: () => Promise<boolean>;
-      setupInitialUser: (username: string, password: string) => Promise<{ success: boolean; error?: string }>;
-      changePassword: (username: string, oldPassword: string, newPassword: string) => Promise<{ success: boolean; error?: string }>;
+      setupInitialUser: (
+        username: string,
+        password: string
+      ) => Promise<{ success: boolean; error?: string }>;
+      changePassword: (
+        username: string,
+        oldPassword: string,
+        newPassword: string
+      ) => Promise<{ success: boolean; error?: string }>;
     };
   }
 }
@@ -117,6 +141,7 @@ function App() {
   const [showChangePassword, setShowChangePassword] = useState(false);
   const [showCategoriesModal, setShowCategoriesModal] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [isBlurred, setIsBlurred] = useState(false);
 
   useEffect(() => {
     loadStocks();
@@ -251,13 +276,14 @@ function App() {
         window.location.reload();
       } else if (!result.canceled) {
         alert(
-          t("messages.restoreFailed") ||
-            "Error al restaurar desde el backup"
+          t("messages.restoreFailed") || "Error al restaurar desde el backup"
         );
       }
     } catch (error) {
       console.error("Error restoring from backup:", error);
-      alert(t("messages.restoreFailed") || "Error al restaurar desde el backup");
+      alert(
+        t("messages.restoreFailed") || "Error al restaurar desde el backup"
+      );
     }
   };
 
@@ -299,48 +325,52 @@ function App() {
   };
 
   return (
-    <div className="app">
-      <Header
-        currentView={view}
-        onViewChange={handleViewChange}
-        onExport={handleExport}
-        onImport={handleImport}
-        onBackup={handleBackup}
-        onRestore={handleRestore}
-        onChangePassword={() => setShowChangePassword(true)}
-        onCategories={() => setShowCategoriesModal(true)}
-        currentUser={currentUser}
-      />
-      <div className="app-main-content">{renderContent()}</div>
-
-      {showAddStock && (
-        <AddStockModal
-          onClose={() => setShowAddStock(false)}
-          onSave={handleAddStock}
+    <BlurProvider isBlurred={isBlurred}>
+      <div className="app">
+        <Header
+          currentView={view}
+          onViewChange={handleViewChange}
+          onExport={handleExport}
+          onImport={handleImport}
+          onBackup={handleBackup}
+          onRestore={handleRestore}
+          onChangePassword={() => setShowChangePassword(true)}
+          onCategories={() => setShowCategoriesModal(true)}
+          currentUser={currentUser}
+          isBlurred={isBlurred}
+          onToggleBlur={() => setIsBlurred(!isBlurred)}
         />
-      )}
+        <div className="app-main-content">{renderContent()}</div>
 
-      {showAddMovement && selectedStock && (
-        <AddMovementModal
-          stock={selectedStock}
-          onClose={() => setShowAddMovement(false)}
-          onSave={handleAddMovement}
-        />
-      )}
+        {showAddStock && (
+          <AddStockModal
+            onClose={() => setShowAddStock(false)}
+            onSave={handleAddStock}
+          />
+        )}
 
-      {showChangePassword && currentUser && (
-        <ChangePasswordModal
-          username={currentUser}
-          onClose={() => setShowChangePassword(false)}
-        />
-      )}
+        {showAddMovement && selectedStock && (
+          <AddMovementModal
+            stock={selectedStock}
+            onClose={() => setShowAddMovement(false)}
+            onSave={handleAddMovement}
+          />
+        )}
 
-      {showCategoriesModal && (
-        <CategoriesManagerModal
-          onClose={() => setShowCategoriesModal(false)}
-        />
-      )}
-    </div>
+        {showChangePassword && currentUser && (
+          <ChangePasswordModal
+            username={currentUser}
+            onClose={() => setShowChangePassword(false)}
+          />
+        )}
+
+        {showCategoriesModal && (
+          <CategoriesManagerModal
+            onClose={() => setShowCategoriesModal(false)}
+          />
+        )}
+      </div>
+    </BlurProvider>
   );
 }
 

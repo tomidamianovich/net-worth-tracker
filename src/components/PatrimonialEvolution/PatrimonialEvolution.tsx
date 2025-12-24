@@ -4,10 +4,12 @@ import {
   PatrimonialEvolutionFormData,
 } from "./types";
 import { useTranslation } from "../../i18n/hooks";
+import { useBlur } from "../../contexts/BlurContext";
 import "./PatrimonialEvolution.css";
 
 function PatrimonialEvolution() {
   const { t } = useTranslation();
+  const { isBlurred } = useBlur();
   const [records, setRecords] = useState<PatrimonialEvolutionRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingRecord, setEditingRecord] =
@@ -294,6 +296,7 @@ function PatrimonialEvolution() {
                     textAnchor="end"
                     fontSize="12"
                     fill="#666"
+                    className={isBlurred ? "blur-values" : ""}
                   >
                     {formatCurrency(value)}
                   </text>
@@ -471,7 +474,11 @@ function PatrimonialEvolution() {
                         )}
                         <td>{record.dia}</td>
                         <td>{MONTHS[record.mes - 1]}</td>
-                        <td className="patrimonio-cell">
+                        <td
+                          className={`patrimonio-cell ${
+                            isBlurred ? "blur-values" : ""
+                          }`}
+                        >
                           {formatCurrency(record.patrimonio)}
                         </td>
                         <td
@@ -481,7 +488,7 @@ function PatrimonialEvolution() {
                               : variation >= 0
                               ? "positive"
                               : "negative"
-                          }`}
+                          } ${isBlurred ? "blur-values" : ""}`}
                         >
                           {variation === null ? "-" : formatCurrency(variation)}
                         </td>
@@ -489,7 +496,9 @@ function PatrimonialEvolution() {
                           <>
                             <td
                               rowSpan={rowSpan}
-                              className="avg-variation-cell"
+                              className={`avg-variation-cell ${
+                                isBlurred ? "blur-values" : ""
+                              }`}
                             >
                               {formatCurrency(stats.avgVariation)}
                             </td>
@@ -497,7 +506,7 @@ function PatrimonialEvolution() {
                               rowSpan={rowSpan}
                               className={`total-accumulated-cell ${
                                 stats.totalAccumulated >= 0 ? "positive" : ""
-                              }`}
+                              } ${isBlurred ? "blur-values" : ""}`}
                             >
                               {formatCurrency(stats.totalAccumulated)}
                             </td>

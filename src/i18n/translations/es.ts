@@ -30,6 +30,8 @@ export const es = {
     backup: "Backup",
     restore: "Restaurar",
     changePassword: "Cambiar Contraseña",
+    hideValues: "Ocultar valores",
+    showValues: "Mostrar valores",
   },
 
   // Portfolio
