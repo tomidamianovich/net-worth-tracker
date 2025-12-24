@@ -5,6 +5,7 @@ A modern Electron desktop application for tracking and managing your net worth, 
 ## Features
 
 ### Portfolio Management
+
 - **Asset Portfolio**: Visualize all your assets in a comprehensive table with automatic calculations of variations and portfolio percentages
 - **Multiple Asset Types**: Support for stocks, ETFs, cryptocurrencies, fiat currencies, and deposits
 - **Real-time Price Updates**: Automatic price fetching for Bitcoin, Ethereum, gold, and other assets
@@ -12,24 +13,28 @@ A modern Electron desktop application for tracking and managing your net worth, 
 - **Category Management**: Organize assets with custom categories and colors
 
 ### Patrimonial Evolution
+
 - **Historical Tracking**: Track your net worth evolution over time with monthly records
 - **Interactive Charts**: Visual representation of your patrimonial growth
 - **Variation Analysis**: Calculate variations, averages, and accumulated totals by year
 - **Detailed Records**: Add notes and details for each patrimonial entry
 
 ### Property Investment
+
 - **Rental Income Tracking**: Record monthly rental income in ARS and USD
 - **Profit Analysis**: Calculate monthly and annual profits with automatic averaging
 - **Annualized Returns**: View annualized profit percentages
 - **Investment Tracking**: Track initial property investment and returns
 
 ### Privacy & Security
+
 - **Blur Values**: Toggle button to blur all monetary values for privacy when sharing your screen
 - **Local Database**: All data stored locally using SQLite
 - **Encryption**: Secure data storage with encryption support
 - **User Authentication**: Password-protected access with user management
 
 ### Data Management
+
 - **Export/Import**: Export and import your complete data in JSON format
 - **Backup & Restore**: Create backups and restore from previous backups
 - **Data Migration**: Automatic database schema migration for seamless updates
@@ -45,18 +50,21 @@ A modern Electron desktop application for tracking and managing your net worth, 
 ## Installation
 
 ### Prerequisites
+
 - Node.js (v18 or higher)
 - pnpm (recommended) or npm
 
 ### Setup
 
 1. Clone the repository:
+
 ```bash
 git clone https://github.com/tomidamianovich/net-worth-tracker.git
 cd net-worth-tracker
 ```
 
 2. Install dependencies:
+
 ```bash
 pnpm install
 ```
@@ -70,6 +78,7 @@ pnpm dev
 ```
 
 This will start:
+
 - Vite dev server on http://localhost:5173
 - Electron app with hot reload
 
@@ -93,6 +102,7 @@ pnpm build
 ```
 
 This compiles:
+
 - React renderer code to `dist/`
 - Electron main process code to `dist/main/`
 
@@ -103,6 +113,7 @@ pnpm electron:build
 ```
 
 This creates distributable packages in the `release/` directory:
+
 - Linux: AppImage format
 
 ## Project Structure
@@ -152,6 +163,7 @@ net-worth-tracker/
 ## Features in Detail
 
 ### Asset Management
+
 - Add, edit, and delete assets
 - Support for multiple asset types (stocks, ETFs, crypto, fiat, deposits)
 - Automatic price updates for supported assets
@@ -159,11 +171,13 @@ net-worth-tracker/
 - Variation tracking (percentage and absolute)
 
 ### Privacy Features
+
 - **Blur Values Button**: Click the eye icon in the header to blur all monetary values
 - Useful when sharing your screen or taking screenshots
 - Smooth transitions and hover effects
 
 ### Data Persistence
+
 - All data stored locally in SQLite database
 - Automatic backups on data operations
 - Export/import functionality for data portability
@@ -180,4 +194,5 @@ MIT License - see LICENSE file for details
 ## Author
 
 **Tomidamianovich**
+
 - GitHub: [@tomidamianovich](https://github.com/tomidamianovich)
