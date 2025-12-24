@@ -11,13 +11,11 @@ Aplicación Electron para gestionar y hacer seguimiento de tu patrimonio neto, a
 
 # Imagenes
 
-![Uploading Captura desde 2025-12-24 17-19-19.png…]()
+<img width="1920" height="1017" alt="Captura desde 2025-12-24 17-19-19" src="https://github.com/user-attachments/assets/3bf87d01-c5e9-49bd-b576-e33abca83edd" />
 
-![Uploading Captura desde 2025-12-24 17-19-46.png…]()
+<img width="1920" height="1017" alt="Captura desde 2025-12-24 17-19-46" src="https://github.com/user-attachments/assets/3d12bed5-e1ad-4234-b3d0-803520f23356" />
 
 <img width="1920" height="1017" alt="Captura desde 2025-12-24 17-20-01" src="https://github.com/user-attachments/assets/5e5be689-0dc9-4b3f-9d21-9baf7dfa2fec" />
-
-
 
 ## Instalación
 
