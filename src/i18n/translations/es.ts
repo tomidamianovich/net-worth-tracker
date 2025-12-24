@@ -20,11 +20,11 @@ export const es = {
 
   // Navigation
   nav: {
-    portfolio: "Portfolio",
+    portfolio: "Inversiones",
     analysis: "Análisis",
     categories: "Categorías",
-    evolution: "Evolución",
-    propertyInvestment: "Inversión Piso",
+    evolution: "Patrimonio",
+    propertyInvestment: "Alquiler",
     import: "Importar",
     export: "Exportar",
     backup: "Backup",
@@ -104,7 +104,6 @@ export const es = {
     month: "Mes",
     day: "Día",
     patrimony: "Patrimonio",
-    detail: "Detalle",
     variation: "Variación",
     avgMonthlyVariation: "Promedio Mensual Variación",
     totalAccumulated: "Total Acumulado",
@@ -210,8 +209,12 @@ export const es = {
 
   // Property Investment
   propertyInvestment: {
-    title: "Inversión Piso Argentina",
+    title: "Alquiler Argentina",
     subtitle: "Seguimiento de ingresos por alquiler",
+    initialInvestment: "Inversión Inicial",
+    annualGrowth: "Crecimiento Anual",
+    clickToEdit: "Click para editar",
+    errorUpdatingInvestment: "Error al actualizar la inversión inicial",
     empty: "No hay ingresos registrados",
     deleteConfirm: "¿Estás seguro de que quieres eliminar este ingreso?",
     errorDeleting: "Error al eliminar ingreso",

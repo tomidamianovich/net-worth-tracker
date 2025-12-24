@@ -1,5 +1,5 @@
 .property-container {
-  padding: var(--spacing-3xl) var(--spacing-5xl);
+  padding: var(--spacing-5xl);
   width: 100%;
   height: 100%;
   display: flex;
@@ -8,12 +8,10 @@
   overflow-y: auto;
 }
 
-/* Unified View Header Styles */
 .view-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: var(--spacing-2xl);
 }
 
 .view-header-text h1 {
@@ -34,11 +32,11 @@
   line-height: var(--line-height-loose);
 }
 
-/* Legacy class names for backward compatibility */
 .property-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+  align-items: center;
   margin-bottom: var(--spacing-2xl);
 }
 
@@ -58,6 +56,66 @@
   font-weight: var(--font-weight-normal);
   letter-spacing: var(--letter-spacing-relaxed);
   line-height: var(--line-height-loose);
+}
+
+.property-investment-input {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
+.property-investment-input label {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
+.investment-display {
+  padding: 6px 12px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-md);
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-primary);
+  cursor: pointer;
+  transition: var(--transition-all);
+  font-weight: var(--font-weight-medium);
+  min-width: 120px;
+  display: inline-block;
+}
+
+.investment-display:hover {
+  border-color: var(--color-border-light);
+  background-color: var(--color-bg-hover);
+}
+
+.investment-input {
+  padding: 6px 12px;
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-md);
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-primary);
+  width: 150px;
+  transition: var(--transition-all);
+}
+
+.investment-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-light);
+}
+
+.investment-growth {
+  font-size: var(--font-size-md);
+  color: var(--color-text-muted);
+  font-weight: var(--font-weight-medium);
+  padding: 6px 12px;
+  background-color: var(--color-bg-primary);
+  border-radius: var(--radius-md);
+  margin-left: auto;
 }
 
 .btn-add-circular {
@@ -116,7 +174,7 @@
 
 .property-table td {
   padding: 12px 16px;
-  border-bottom: 1px solid #e9ecef;
+  border: 1px solid #e9ecef;
   color: #212529;
   text-align: center;
 }

@@ -438,7 +438,6 @@ function PatrimonialEvolution() {
                   <th>{t("evolution.month")}</th>
                   <th>{t("evolution.patrimony")}</th>
                   <th>{t("evolution.variation")}</th>
-                  <th>{t("evolution.detail")}</th>
                   <th>{t("evolution.avgMonthlyVariation")}</th>
                   <th>{t("evolution.totalAccumulated")}</th>
                   <th>{t("evolution.actions")}</th>
@@ -485,15 +484,6 @@ function PatrimonialEvolution() {
                           }`}
                         >
                           {variation === null ? "-" : formatCurrency(variation)}
-                        </td>
-                        <td className="detail-cell">
-                          {record.detalle ? (
-                            <a href="#" className="detail-link">
-                              {t("evolution.link")}
-                            </a>
-                          ) : (
-                            ""
-                          )}
                         </td>
                         {isFirstInYear && (
                           <>

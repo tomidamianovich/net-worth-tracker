@@ -172,7 +172,7 @@ function PortfolioTable() {
   const renderPieChart = (data: AssetData[]) => {
     if (data.length === 0) return null;
 
-    const size = 350;
+    const size = 250;
     const radius = size / 2 - 30;
     const centerX = size / 2;
     const centerY = size / 2;
@@ -578,12 +578,6 @@ function PortfolioTable() {
 
         {assets.length > 0 && (
           <div className="portfolio-analysis-section">
-            <div className="analysis-chart-wrapper">
-              <div className="analysis-chart-container">
-                {renderPieChart(calculateAssetDistribution())}
-              </div>
-            </div>
-
             <div className="analysis-right-column">
               <div className="analysis-legend">
                 <h2>{t("analysis.distribution")}</h2>
@@ -604,6 +598,11 @@ function PortfolioTable() {
                     </div>
                   ))}
                 </div>
+              </div>
+            </div>
+            <div className="analysis-chart-wrapper">
+              <div className="analysis-chart-container">
+                {renderPieChart(calculateAssetDistribution())}
               </div>
             </div>
           </div>

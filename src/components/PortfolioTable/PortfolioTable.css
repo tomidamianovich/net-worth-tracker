@@ -1,5 +1,5 @@
 .portfolio-container {
-  padding: var(--spacing-3xl) var(--spacing-5xl);
+  padding: var(--spacing-5xl);
   width: 100%;
   height: 100%;
   display: flex;
@@ -31,7 +31,6 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: var(--spacing-2xl);
 }
 
 .view-header-text h1 {
@@ -112,6 +111,10 @@
   padding: var(--spacing-2xl);
   box-shadow: var(--shadow-sm);
   flex: 0 0 40%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: start;
   height: 100%;
 }
 
@@ -124,7 +127,6 @@
 }
 
 .analysis-chart-wrapper {
-  flex: 1;
   min-width: 0;
   display: flex;
   flex-direction: column;
@@ -149,8 +151,6 @@
   background: #ffffff;
   border-radius: 16px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  width: 100%;
-  height: 100%;
 }
 
 .analysis-chart-container svg {
@@ -168,6 +168,7 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   overflow-y: auto;
   overflow-x: hidden;
+  justify-content: center;
   display: flex;
   flex-direction: column;
 }
@@ -183,19 +184,19 @@
 }
 
 .legend-items {
-  flex: 1;
   min-height: 0;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: 0;
+  flex-wrap: wrap;
 }
 
 .analysis-legend-item {
   display: flex;
   align-items: center;
   gap: 16px;
+  flex: calc(50% - 16px);
   padding: 16px 0;
-  border-bottom: 1px solid #f5f5f5;
 }
 
 .analysis-legend-item:last-child {
@@ -311,7 +312,6 @@
   gap: 32px;
   padding-top: 16px;
   align-items: flex-start;
-  flex-direction: column;
 }
 
 .summary-detail {

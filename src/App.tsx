@@ -54,7 +54,28 @@ declare global {
         updates: { nombre?: string; color?: string }
       ) => Promise<boolean>;
       deleteCategory: (id: number) => Promise<boolean>;
+      getPatrimonialEvolution: () => Promise<any[]>;
+      addPatrimonialEvolution: (evolution: {
+        año: number;
+        mes: number;
+        dia: number;
+        patrimonio: number;
+        detalle?: string;
+      }) => Promise<any>;
+      updatePatrimonialEvolution: (
+        id: number,
+        updates: {
+          año?: number;
+          mes?: number;
+          dia?: number;
+          patrimonio?: number;
+          detalle?: string;
+        }
+      ) => Promise<boolean>;
+      deletePatrimonialEvolution: (id: number) => Promise<boolean>;
       getRentalIncomes: () => Promise<any[]>;
+      getPropertyInitialInvestment: () => Promise<number>;
+      updatePropertyInitialInvestment: (investment: number) => Promise<boolean>;
       addRentalIncome: (income: {
         año: number;
         mes: number;

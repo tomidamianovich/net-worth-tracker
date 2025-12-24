@@ -131,6 +131,10 @@ try {
     ) => ipcRenderer.invoke("update-rental-income", id, updates),
     deleteRentalIncome: (id: number) =>
       ipcRenderer.invoke("delete-rental-income", id),
+    getPropertyInitialInvestment: () =>
+      ipcRenderer.invoke("get-property-initial-investment"),
+    updatePropertyInitialInvestment: (investment: number) =>
+      ipcRenderer.invoke("update-property-initial-investment", investment),
 
     // Backup and restore APIs
     createBackup: () => ipcRenderer.invoke("create-backup"),
@@ -143,7 +147,11 @@ try {
     hasUsers: () => ipcRenderer.invoke("has-users"),
     setupInitialUser: (username: string, password: string) =>
       ipcRenderer.invoke("setup-initial-user", username, password),
-    changePassword: (username: string, oldPassword: string, newPassword: string) =>
+    changePassword: (
+      username: string,
+      oldPassword: string,
+      newPassword: string
+    ) =>
       ipcRenderer.invoke("change-password", username, oldPassword, newPassword),
   });
 } catch (error) {}

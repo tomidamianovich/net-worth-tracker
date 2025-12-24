@@ -132,6 +132,16 @@ export class StockDatabase {
 
       CREATE INDEX IF NOT EXISTS idx_rental_incomes_año_mes ON rental_incomes(año, mes);
 
+      CREATE TABLE IF NOT EXISTS property_config (
+        id INTEGER PRIMARY KEY DEFAULT 1,
+        initial_investment REAL DEFAULT 0,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        CHECK(id = 1)
+      );
+
+      -- Initialize property_config if it doesn't exist
+      INSERT OR IGNORE INTO property_config (id, initial_investment) VALUES (1, 0);
+
       CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         username TEXT NOT NULL UNIQUE,
@@ -396,10 +406,28 @@ export class StockDatabase {
 
   // Export/Import
   exportAllData() {
+    try {
     const stocks = this.getAllStocks();
     const movements = this.db
       .prepare("SELECT * FROM movements ORDER BY stock_id, date")
       .all() as any[];
+      const assets = this.getAllAssets();
+      const categories = this.getAllCategories();
+      const patrimonialEvolution = this.getAllPatrimonialEvolution();
+      const rentalIncomes = this.getAllRentalIncomes();
+      const propertyConfig = this.db
+        .prepare("SELECT initial_investment FROM property_config WHERE id = 1")
+        .get() as { initial_investment: number } | undefined;
+
+      console.log("Export data counts:", {
+        stocks: stocks.length,
+        movements: movements.length,
+        assets: assets.length,
+        categories: categories.length,
+        patrimonialEvolution: patrimonialEvolution.length,
+        rentalIncomes: rentalIncomes.length,
+        propertyConfig: propertyConfig?.initial_investment || 0,
+      });
 
     return {
       stocks: stocks.map((s) => ({ ...s, notes_encrypted: undefined })),
@@ -408,22 +436,82 @@ export class StockDatabase {
         notes: m.notes_encrypted ? this.decrypt(m.notes_encrypted) : null,
         notes_encrypted: undefined,
       })),
+        assets: assets.map((a) => ({
+          concepto: a.concepto,
+          cantidad: a.cantidad,
+          valor: a.valor,
+          valor_unitario: a.valor_unitario,
+          tipo: a.tipo,
+        })),
+        categories: categories.map((c) => ({
+          tipo: c.tipo,
+          nombre: c.nombre,
+          color: c.color,
+        })),
+        patrimonialEvolution: patrimonialEvolution.map((p) => ({
+          año: p.año,
+          mes: p.mes,
+          dia: p.dia,
+          patrimonio: p.patrimonio,
+          detalle: p.detalle,
+        })),
+        rentalIncomes: rentalIncomes.map((r) => ({
+          año: r.año,
+          mes: r.mes,
+          precio_alquiler_ars: r.precio_alquiler_ars,
+          valor_usd: r.valor_usd,
+          ganancia_usd: r.ganancia_usd,
+        })),
+        propertyConfig: {
+          initialInvestment: propertyConfig?.initial_investment || 0,
+        },
       exportDate: new Date().toISOString(),
     };
+    } catch (error) {
+      console.error("Error in exportAllData:", error);
+      throw error;
+    }
   }
 
-  importData(data: { stocks: any[]; movements: any[] }) {
+  importData(data: {
+    stocks?: any[];
+    movements?: any[];
+    assets?: any[];
+    categories?: any[];
+    patrimonialEvolution?: any[];
+    rentalIncomes?: any[];
+    propertyConfig?: { initialInvestment?: number };
+  }) {
     const transaction = this.db.transaction(() => {
       // Clear existing data
+      if (data.movements) {
       this.db.prepare("DELETE FROM movements").run();
+      }
+      if (data.stocks) {
       this.db.prepare("DELETE FROM stocks").run();
+      }
+      if (data.assets) {
+        this.db.prepare("DELETE FROM assets").run();
+      }
+      if (data.categories) {
+        this.db.prepare("DELETE FROM categories").run();
+      }
+      if (data.patrimonialEvolution) {
+        this.db.prepare("DELETE FROM patrimonial_evolution").run();
+      }
+      if (data.rentalIncomes) {
+        this.db.prepare("DELETE FROM rental_incomes").run();
+      }
 
       // Import stocks
+      if (data.stocks) {
       for (const stock of data.stocks) {
         this.insertStock(stock.symbol, stock.name, stock.exchange, stock.notes);
+        }
       }
 
       // Import movements (need to map old stock IDs to new ones)
+      if (data.movements && data.stocks) {
       const stockMap = new Map<string, number>();
       const allStocks = this.getAllStocks();
       for (const stock of allStocks) {
@@ -446,6 +534,58 @@ export class StockDatabase {
             );
           }
         }
+        }
+      }
+
+      // Import assets
+      if (data.assets) {
+        for (const asset of data.assets) {
+          this.insertAsset(
+            asset.concepto,
+            asset.cantidad,
+            asset.valor,
+            asset.valor_unitario,
+            asset.tipo || "ACCION"
+          );
+        }
+      }
+
+      // Import categories
+      if (data.categories) {
+        for (const category of data.categories) {
+          this.insertCategory(category.tipo, category.nombre, category.color);
+        }
+      }
+
+      // Import patrimonial evolution
+      if (data.patrimonialEvolution) {
+        for (const evolution of data.patrimonialEvolution) {
+          this.insertPatrimonialEvolution(
+            evolution.año,
+            evolution.mes,
+            evolution.dia || 1,
+            evolution.patrimonio,
+            evolution.detalle
+          );
+        }
+      }
+
+      // Import rental incomes
+      if (data.rentalIncomes) {
+        for (const income of data.rentalIncomes) {
+          this.insertRentalIncome(
+            income.año,
+            income.mes,
+            income.precio_alquiler_ars,
+            income.valor_usd,
+            income.ganancia_usd
+          );
+        }
+      }
+
+      // Import property config
+      if (data.propertyConfig?.initialInvestment !== undefined) {
+        this.updatePropertyInitialInvestment(data.propertyConfig.initialInvestment);
       }
     });
 
@@ -861,6 +1001,21 @@ export class StockDatabase {
     const stmt = this.db.prepare("SELECT COUNT(*) as count FROM users");
     const result = stmt.get() as { count: number };
     return result.count > 0;
+  }
+
+  // Property config operations
+  getPropertyInitialInvestment(): number {
+    const stmt = this.db.prepare("SELECT initial_investment FROM property_config WHERE id = 1");
+    const result = stmt.get() as { initial_investment: number } | undefined;
+    return result?.initial_investment || 0;
+  }
+
+  updatePropertyInitialInvestment(investment: number): boolean {
+    const stmt = this.db.prepare(
+      "UPDATE property_config SET initial_investment = ?, updated_at = CURRENT_TIMESTAMP WHERE id = 1"
+    );
+    const result = stmt.run(investment);
+    return result.changes > 0;
   }
 
   close() {

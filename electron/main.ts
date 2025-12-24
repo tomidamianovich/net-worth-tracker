@@ -80,6 +80,8 @@ let authService: AuthService;
 function createWindow() {
   const preloadPath = path.join(__dirname, "preload.js");
 
+  const isDev = !app.isPackaged && process.env.NODE_ENV !== "production";
+
   mainWindow = new BrowserWindow({
     width: 1400,
     height: 900,
@@ -90,13 +92,15 @@ function createWindow() {
     },
   });
 
-  mainWindow.setMenuBarVisibility(false);
-
-  Menu.setApplicationMenu(null);
+  // Show menu bar in development, hide in production
+  if (isDev) {
+    mainWindow.setMenuBarVisibility(true);
+  } else {
+    mainWindow.setMenuBarVisibility(false);
+    Menu.setApplicationMenu(null);
+  }
 
   mainWindow.webContents.on("did-fail-load", () => {});
-
-  const isDev = !app.isPackaged && process.env.NODE_ENV !== "production";
 
   if (isDev) {
     mainWindow.loadURL("http://localhost:5173");
@@ -177,21 +181,42 @@ function registerIpcHandlers() {
   ipcMain.handle("export-data", async () => {
     try {
       const data = stockService.exportAllData();
+      console.log("Export data structure:", {
+        hasStocks: Array.isArray(data.stocks),
+        hasMovements: Array.isArray(data.movements),
+        hasAssets: Array.isArray(data.assets),
+        hasCategories: Array.isArray(data.categories),
+        hasPatrimonialEvolution: Array.isArray(data.patrimonialEvolution),
+        hasRentalIncomes: Array.isArray(data.rentalIncomes),
+        hasPropertyConfig: !!data.propertyConfig,
+      });
+
       const result = await dialog.showSaveDialog(mainWindow!, {
         title: "Export Data",
-        defaultPath: "stock-tracker-export.json",
+        defaultPath: "net-worth-tracker-export.json",
         filters: [{ name: "JSON", extensions: ["json"] }],
       });
 
       if (result.canceled) {
-        return { success: false };
+        return { success: false, canceled: true };
       }
 
-      fs.writeFileSync(result.filePath!, JSON.stringify(data, null, 2));
+      if (!result.filePath) {
+        return { success: false, error: "No file path provided" };
+      }
+
+      const jsonData = JSON.stringify(data, null, 2);
+      fs.writeFileSync(result.filePath, jsonData);
+      console.log("File written successfully to:", result.filePath);
+      console.log("File size:", jsonData.length, "bytes");
+
       return { success: true, path: result.filePath };
     } catch (error) {
       console.error("Export error:", error);
-      return { success: false };
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error",
+      };
     }
   });
 
@@ -412,6 +437,32 @@ function registerIpcHandlers() {
       return result;
     } catch (error) {
       console.error("Error in delete-rental-income handler:", error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle("get-property-initial-investment", () => {
+    try {
+      return rentalIncomeService.getPropertyInitialInvestment();
+    } catch (error) {
+      console.error("Error in get-property-initial-investment handler:", error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle("update-property-initial-investment", (_, investment) => {
+    try {
+      const result =
+        rentalIncomeService.updatePropertyInitialInvestment(investment);
+      if (!result) {
+        throw new Error("Failed to update property initial investment");
+      }
+      return result;
+    } catch (error) {
+      console.error(
+        "Error in update-property-initial-investment handler:",
+        error
+      );
       throw error;
     }
   });

@@ -50,6 +50,7 @@ body {
   border-bottom: none;
   z-index: var(--z-index-dropdown);
   height: 70px;
+  box-shadow: 1px 1px 4px 0px gray;
 }
 
 .header-left {

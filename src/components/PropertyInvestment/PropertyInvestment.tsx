@@ -10,10 +10,76 @@ function PropertyInvestment() {
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingIncome, setEditingIncome] = useState<RentalIncome | null>(null);
+  const [initialInvestment, setInitialInvestment] = useState<number>(0);
+  const [isEditingInvestment, setIsEditingInvestment] = useState(false);
+  const [tempInvestmentValue, setTempInvestmentValue] = useState<string>("");
 
   useEffect(() => {
     loadIncomes();
+    loadInitialInvestment();
   }, []);
+
+  const loadInitialInvestment = async () => {
+    try {
+      if (
+        typeof window === "undefined" ||
+        !window.electronAPI ||
+        !window.electronAPI.getPropertyInitialInvestment
+      ) {
+        return;
+      }
+      const investment =
+        await window.electronAPI.getPropertyInitialInvestment();
+      setInitialInvestment(investment || 0);
+    } catch (error) {
+      console.error("Error loading initial investment:", error);
+    }
+  };
+
+  const handleInvestmentClick = () => {
+    setIsEditingInvestment(true);
+    setTempInvestmentValue(initialInvestment.toString());
+  };
+
+  const handleInvestmentChange = (value: string) => {
+    setTempInvestmentValue(value);
+  };
+
+  const handleInvestmentBlur = async () => {
+    try {
+      const numValue = parseFloat(tempInvestmentValue) || 0;
+      setInitialInvestment(numValue);
+      setIsEditingInvestment(false);
+
+      if (
+        typeof window === "undefined" ||
+        !window.electronAPI ||
+        !window.electronAPI.updatePropertyInitialInvestment
+      ) {
+        return;
+      }
+      await window.electronAPI.updatePropertyInitialInvestment(numValue);
+    } catch (error) {
+      console.error("Error updating initial investment:", error);
+      alert(
+        t("propertyInvestment.errorUpdatingInvestment") ||
+          "Error al actualizar la inversión inicial"
+      );
+      setTempInvestmentValue(initialInvestment.toString());
+      setIsEditingInvestment(false);
+    }
+  };
+
+  const handleInvestmentKeyDown = (
+    e: React.KeyboardEvent<HTMLInputElement>
+  ) => {
+    if (e.key === "Enter") {
+      handleInvestmentBlur();
+    } else if (e.key === "Escape") {
+      setTempInvestmentValue(initialInvestment.toString());
+      setIsEditingInvestment(false);
+    }
+  };
 
   const loadIncomes = async () => {
     try {
@@ -96,20 +162,6 @@ function PropertyInvestment() {
     return grouped;
   };
 
-  const calculateYearSummary = (yearIncomes: RentalIncome[]): RentalSummary => {
-    const gananciasAnualesUSD = yearIncomes.reduce(
-      (sum, income) => sum + income.gananciaUSD,
-      0
-    );
-    const promedioMensualUSD =
-      yearIncomes.length > 0 ? gananciasAnualesUSD / yearIncomes.length : 0;
-    return {
-      año: yearIncomes[0].año,
-      promedioMensualUSD,
-      gananciasAnualesUSD,
-    };
-  };
-
   const calculateTotalAverage = (summaries: RentalSummary[]): number => {
     const total = summaries.reduce(
       (sum, summary) => sum + summary.promedioMensualUSD,
@@ -119,8 +171,36 @@ function PropertyInvestment() {
   };
 
   const groupedIncomes = groupByYear(incomes);
-  const summaries = Array.from(groupedIncomes.values()).map(
-    calculateYearSummary
+
+  // Calculate summaries with annual growth percentage
+  // If we don't have all 12 months, multiply the average by 12 to project the full year
+  const summaries = Array.from(groupedIncomes.entries()).map(
+    ([year, yearIncomes]) => {
+      const gananciasAnualesUSD = yearIncomes.reduce(
+        (sum, income) => sum + income.gananciaUSD,
+        0
+      );
+      const promedioMensualUSD =
+        yearIncomes.length > 0 ? gananciasAnualesUSD / yearIncomes.length : 0;
+
+      // Project annual gains: if we don't have all 12 months, multiply average by 12
+      const monthsCount = yearIncomes.length;
+      const projectedAnnualGains =
+        monthsCount < 12 ? promedioMensualUSD * 12 : gananciasAnualesUSD;
+
+      // Calculate annual growth percentage based on initial investment
+      const gananciaAnualizada =
+        initialInvestment > 0
+          ? (projectedAnnualGains / initialInvestment) * 100
+          : 0;
+
+      return {
+        año: year,
+        promedioMensualUSD,
+        gananciasAnualesUSD,
+        gananciaAnualizada,
+      };
+    }
   );
   const totalAverage = calculateTotalAverage(summaries);
   const totalFinal = summaries.reduce(
@@ -154,6 +234,32 @@ function PropertyInvestment() {
           <p className="view-subtitle property-subtitle">
             {t("propertyInvestment.subtitle")}
           </p>
+          <div className="property-investment-input">
+            <label>{t("propertyInvestment.initialInvestment")}:</label>
+            {isEditingInvestment ? (
+              <input
+                type="number"
+                value={tempInvestmentValue}
+                onChange={(e) => handleInvestmentChange(e.target.value)}
+                onBlur={handleInvestmentBlur}
+                onKeyDown={handleInvestmentKeyDown}
+                autoFocus
+                step="0.01"
+                min="0"
+                className="investment-input"
+              />
+            ) : (
+              <span
+                className="investment-display"
+                onClick={handleInvestmentClick}
+                title={
+                  t("propertyInvestment.clickToEdit") || "Click para editar"
+                }
+              >
+                {formatCurrency(initialInvestment)}
+              </span>
+            )}
+          </div>
         </div>
         <button
           className="btn-add-circular"
@@ -342,8 +448,9 @@ function PropertyInvestment() {
                 <td colSpan={5} className="total-label">
                   {t("propertyInvestment.table.total")}
                 </td>
-                <td className="total-value">{formatCurrency(totalFinal)}</td>
-                <td colSpan={3}></td>
+                <td className="total-value" colSpan={4}>
+                  {formatCurrency(totalFinal)}
+                </td>
               </tr>
             </tfoot>
           )}

@@ -78,5 +78,13 @@ export class RentalIncomeService {
   deleteRentalIncome(id: number): boolean {
     return this.db.deleteRentalIncome(id);
   }
+
+  getPropertyInitialInvestment(): number {
+    return this.db.getPropertyInitialInvestment();
+  }
+
+  updatePropertyInitialInvestment(investment: number): boolean {
+    return this.db.updatePropertyInitialInvestment(investment);
+  }
 }
 
